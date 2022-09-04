@@ -13,10 +13,7 @@ public class MainFrame extends JFrame{
     final static Font buttonFont = new Font("Arial", Font.ROMAN_BASELINE, 14);
     
     static JFrame f;
-    static JTextField tfName;
-    static JLabel lbWelcome;
     static JMenuBar menuBar;
-
     static Integer numStaves = 4;
 
     public static void main(String[] args) {
@@ -24,9 +21,24 @@ public class MainFrame extends JFrame{
         /*JFrame */
         f = new JFrame("Music Editor");
 
+
         /*Status bar*/
         JLabel statusBar = new JLabel("No control selected.");
         statusBar.setFont(subFont);
+
+
+        /*Main Content Panel */
+        JPanel content = new JPanel();
+        JScrollPane contentPane = new JScrollPane(content);
+        JLabel stavesInfo = new JLabel("My Music Editor. Showing " + numStaves + " staves.");
+        stavesInfo.setHorizontalAlignment(JLabel.CENTER);
+        content.add(stavesInfo);
+
+        contentPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        contentPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        content.setLayout((new GridLayout(1, 1)));
+        // content.setBorder(BorderFactory.createLineBorder(Color.black));
+
         
         /*Menu Bar */
         menuBar = new JMenuBar();
@@ -45,6 +57,33 @@ public class MainFrame extends JFrame{
         f.setJMenuBar(menuBar);
 
 
+        
+        /*Buttons */
+        JButton btnSelect = new JButton("Select");
+        btnSelect.setFont(buttonFont);
+        JButton btnPen = new JButton("Pen");
+        btnPen.setFont(buttonFont);
+        JButton btnNew = new JButton("New Staff");
+        btnNew.setFont(buttonFont);
+        JButton btnDelete = new JButton("Delete Staff");
+        btnDelete.setFont(buttonFont);
+        JButton btnPlay = new JButton("Play");
+        btnPlay.setFont(buttonFont);
+        JButton btnStop = new JButton("Stop");
+        btnStop.setFont(buttonFont);
+
+
+        /*Button Panel*/
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout((new GridLayout(3, 2, 5, 5)));
+        buttonPanel.add(btnSelect);
+        buttonPanel.add(btnPen);
+        buttonPanel.add(btnNew);
+        buttonPanel.add(btnDelete);
+        buttonPanel.add(btnPlay);
+        buttonPanel.add(btnStop);
+
+
         /*Selection of exit option */
         exitMenuItem.addActionListener(new ActionListener() {
 
@@ -52,6 +91,7 @@ public class MainFrame extends JFrame{
             public void actionPerformed(ActionEvent e) {
                 // TODO Auto-generated method stub
                 statusBar.setText("Exit was selected.");
+                stavesInfo.setText("My Music Editor. Showing " + numStaves + " staves.");
             }
             
         });
@@ -67,8 +107,10 @@ public class MainFrame extends JFrame{
                 numStaves = numStaves - 1;
                 if(numStaves==1){
                     deleteMenuItem.setEnabled(false);
+                    btnDelete.setEnabled(false);
                 }
-                statusBar.setText("Delete Staff was selected. Number of staves = " + numStaves);
+                statusBar.setText("Delete Staff was selected.");
+                stavesInfo.setText("My Music Editor. Showing " + numStaves + " staves.");
             }
             
         });
@@ -84,47 +126,53 @@ public class MainFrame extends JFrame{
                 numStaves = numStaves + 1;
                 if(numStaves>1){
                     deleteMenuItem.setEnabled(true);
+                    btnDelete.setEnabled(false);
                 }
-                statusBar.setText("New Staff was selected.. Number of staves = " + numStaves);
+                statusBar.setText("New Staff was selected.");
+                
             }
             
         });
 
 
-        /*Buttons */
-
-        JButton btnSelect = new JButton("Select");
-        btnSelect.setFont(buttonFont);
-        JButton btnPen = new JButton("Pen");
-        btnPen.setFont(buttonFont);
-        JButton btnNew = new JButton("New Staff");
-        btnNew.setFont(buttonFont);
-        JButton btnDelete = new JButton("Delete Staff");
-        btnDelete.setFont(buttonFont);
-        JButton btnPlay = new JButton("Play");
-        btnPlay.setFont(buttonFont);
-        JButton btnStop = new JButton("Stop");
-        btnStop.setFont(buttonFont);
-
-        btnSelect.addActionListener(new ActionListener() {
+        /*Selection of delete option */
+        btnDelete.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
                 // TODO Auto-generated method stub
+                
+                numStaves = numStaves - 1;
+                if(numStaves==1){
+                    deleteMenuItem.setEnabled(false);
+                    btnDelete.setEnabled(false);
+                }
+                statusBar.setText("Delete Staff was selected.");
+                stavesInfo.setText("My Music Editor. Showing " + numStaves + " staves.");
             }
             
         });
 
 
-        /*Button Panel*/
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout((new GridLayout(3, 2, 5, 5)));
-        buttonPanel.add(btnSelect);
-        buttonPanel.add(btnPen);
-        buttonPanel.add(btnNew);
-        buttonPanel.add(btnDelete);
-        buttonPanel.add(btnPlay);
-        buttonPanel.add(btnStop);
+        /*Selection of new option */
+        btnNew.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // TODO Auto-generated method stub
+                
+                numStaves = numStaves + 1;
+                if(numStaves>1){
+                    deleteMenuItem.setEnabled(true);
+                    btnDelete.setEnabled(true);
+                }
+                statusBar.setText("New Staff was selected.");
+                stavesInfo.setText("My Music Editor. Showing " + numStaves + " staves.");
+                
+            }
+            
+        });
+
 
 
         /*Radio Panel */
@@ -182,38 +230,12 @@ public class MainFrame extends JFrame{
         toolPanel.add(choicesPanel);
 
 
-        /*Buttons Panel */
-        JButton btnOk = new JButton("OK");
-        btnOk.setFont(mainFont);
-
-        JButton btnClear = new JButton("Clear");
-        btnClear.setFont(mainFont);
-        btnClear.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // TODO Auto-generated method stub
-                tfName.setText("");
-                lbWelcome.setText("");
-            }
-            
-        });
-
-
-        /*Buttons Panel */
-        JPanel buttonsPanel = new JPanel();
-        buttonsPanel.setLayout(new GridLayout(1, 2, 5, 5));
-        buttonsPanel.add(btnOk);
-        buttonsPanel.add(btnClear);
-
-
         /*Main Panel */
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout());
         mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        // mainPanel.add(menuBar, BorderLayout.NORTH);
         mainPanel.add(toolPanel, BorderLayout.WEST);
-        mainPanel.add(buttonsPanel, BorderLayout.CENTER);
+        mainPanel.add(contentPane, BorderLayout.CENTER);
         mainPanel.add(statusBar, BorderLayout.SOUTH);
 
         f.add(mainPanel);
