@@ -8,13 +8,27 @@ import javax.swing.*;
 public class MainFrame extends JFrame{
 
     /*Global variables*/
-    final static Font mainFont = new Font("Arial", Font.BOLD, 18);
+    final static Font mainFont = new Font("Arial", Font.ROMAN_BASELINE, 18);
     final static Font subFont = new Font("Arial", Font.ITALIC, 14);
-    final static Font buttonFont = new Font("Arial", Font.ROMAN_BASELINE, 14);
+    final static Font buttonFont = new Font("Arial", Font.BOLD, 12);
     
     static JFrame f;
     static JMenuBar menuBar;
     static Integer numStaves = 4;
+    static Color btnColor = new Color(168, 218, 220);
+    static JLabel statusBar = new JLabel("No control selected.");
+
+    public static void setButtonProperties(JButton buttonName, String buttonDef) {
+        buttonName.setText(buttonDef);
+        buttonName.setFont(buttonFont);
+        buttonName.setBackground(btnColor);
+        buttonName.setHorizontalAlignment(SwingConstants.LEFT);  
+    }
+
+    public static void setStatusText(String statusText) {
+        statusBar.setText(statusText + " was selected last.
+        ");
+    }
 
     public static void main(String[] args) {
 
@@ -23,7 +37,6 @@ public class MainFrame extends JFrame{
 
 
         /*Status bar*/
-        JLabel statusBar = new JLabel("No control selected.");
         statusBar.setFont(subFont);
 
 
@@ -34,11 +47,14 @@ public class MainFrame extends JFrame{
         stavesInfo.setHorizontalAlignment(JLabel.CENTER);
         content.add(stavesInfo);
 
+        contentPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         contentPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         contentPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        content.setLayout((new GridLayout(1, 1)));
-        // content.setBorder(BorderFactory.createLineBorder(Color.black));
+        contentPane.setOpaque(false);
 
+        content.setBackground(new Color(241, 250, 238));
+        content.setLayout((new GridLayout(1, 1)));
+              
         
         /*Menu Bar */
         menuBar = new JMenuBar();
@@ -56,32 +72,41 @@ public class MainFrame extends JFrame{
 
         f.setJMenuBar(menuBar);
 
+        
+        /*Icons for buttons */
+        ImageIcon selectIcon =  new ImageIcon("images/select.png");
+        ImageIcon penIcon =  new ImageIcon("images/pen.png");
+        ImageIcon newIcon =  new ImageIcon("images/new.png");
+        ImageIcon deleteIcon =  new ImageIcon("images/delete.png");
+        ImageIcon playIcon =  new ImageIcon("images/play.png");
+        ImageIcon stopIcon =  new ImageIcon("images/stop.png");
+
+
+        /*Buttons */
+        JButton btnSelect = new JButton(selectIcon);
+        setButtonProperties(btnSelect, "Select");
+        JButton btnPen = new JButton(penIcon);
+        setButtonProperties(btnPen, "Pen");        
+        JButton btnNew = new JButton(newIcon);        
+        setButtonProperties(btnNew, "New Staff");
+        JButton btnDelete = new JButton(deleteIcon);
+        setButtonProperties(btnDelete, "Delete staff");
+        JButton btnPlay = new JButton(playIcon);
+        setButtonProperties(btnPlay, "Play");
+        JButton btnStop = new JButton(stopIcon);
+        setButtonProperties(btnStop, "Stop");
 
         
-        /*Buttons */
-        JButton btnSelect = new JButton("Select");
-        btnSelect.setFont(buttonFont);
-        JButton btnPen = new JButton("Pen");
-        btnPen.setFont(buttonFont);
-        JButton btnNew = new JButton("New Staff");
-        btnNew.setFont(buttonFont);
-        JButton btnDelete = new JButton("Delete Staff");
-        btnDelete.setFont(buttonFont);
-        JButton btnPlay = new JButton("Play");
-        btnPlay.setFont(buttonFont);
-        JButton btnStop = new JButton("Stop");
-        btnStop.setFont(buttonFont);
-
-
         /*Button Panel*/
         JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout((new GridLayout(3, 2, 5, 5)));
+        buttonPanel.setLayout((new GridLayout(3, 2, 15, 15)));
         buttonPanel.add(btnSelect);
         buttonPanel.add(btnPen);
         buttonPanel.add(btnNew);
         buttonPanel.add(btnDelete);
         buttonPanel.add(btnPlay);
         buttonPanel.add(btnStop);
+        buttonPanel.setOpaque(false);
 
 
         /*Selection of exit option */
@@ -89,9 +114,8 @@ public class MainFrame extends JFrame{
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                // TODO Auto-generated method stub
                 statusBar.setText("Exit was selected.");
-                stavesInfo.setText("My Music Editor. Showing " + numStaves + " staves.");
+                f.dispose();
             }
             
         });
@@ -102,15 +126,15 @@ public class MainFrame extends JFrame{
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                // TODO Auto-generated method stub
-                
+              
                 numStaves = numStaves - 1;
+                setStatusText("Delete Staff");
+                stavesInfo.setText("My Music Editor. Showing " + numStaves + " staves.");
                 if(numStaves==1){
                     deleteMenuItem.setEnabled(false);
-                    btnDelete.setEnabled(false);
+                    btnDelete.setEnabled(false);                    
                 }
-                statusBar.setText("Delete Staff was selected.");
-                stavesInfo.setText("My Music Editor. Showing " + numStaves + " staves.");
+
             }
             
         });
@@ -121,14 +145,13 @@ public class MainFrame extends JFrame{
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                // TODO Auto-generated method stub
                 
                 numStaves = numStaves + 1;
                 if(numStaves>1){
                     deleteMenuItem.setEnabled(true);
                     btnDelete.setEnabled(false);
                 }
-                statusBar.setText("New Staff was selected.");
+                setStatusText("New Staff");
                 
             }
             
@@ -140,7 +163,6 @@ public class MainFrame extends JFrame{
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                // TODO Auto-generated method stub
                 
                 numStaves = numStaves - 1;
                 if(numStaves==1){
@@ -159,7 +181,6 @@ public class MainFrame extends JFrame{
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                // TODO Auto-generated method stub
                 
                 numStaves = numStaves + 1;
                 if(numStaves>1){
@@ -174,7 +195,6 @@ public class MainFrame extends JFrame{
         });
 
 
-
         /*Radio Panel */
         JRadioButton option1 = new JRadioButton();
         JRadioButton option2 = new JRadioButton();
@@ -183,6 +203,11 @@ public class MainFrame extends JFrame{
         ButtonGroup notation = new ButtonGroup();
         JPanel radioPanel = new JPanel();
         radioPanel.setLayout((new GridLayout(4, 1, 0, 1)));
+        option1.setOpaque(false);
+        option2.setOpaque(false);
+        option3.setOpaque(false);
+        option4.setOpaque(false);
+        radioPanel.setOpaque(false);
 
         notation.add(option1);
         notation.add(option2);
@@ -203,6 +228,7 @@ public class MainFrame extends JFrame{
 
         /*Slider Panel */
         JSlider duration = new JSlider(JSlider.VERTICAL, 0, 4, 1);
+        duration.setOpaque(false);
         duration.setMajorTickSpacing(1);
         duration.setPaintTicks(true);
         
@@ -219,13 +245,16 @@ public class MainFrame extends JFrame{
         /*Choices Panel */
         JPanel choicesPanel = new JPanel();
         choicesPanel.setLayout((new GridLayout(1, 2, 0, 1)));
+        choicesPanel.setOpaque(false);
         choicesPanel.add(radioPanel);
         choicesPanel.add(duration);
 
 
         /*Tool panel */
         JPanel toolPanel = new JPanel();
-        toolPanel.setLayout((new GridLayout(3, 1, 5, 5)));
+        toolPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        toolPanel.setLayout((new GridLayout(3, 1, 30, 30)));
+        toolPanel.setOpaque(false);
         toolPanel.add(buttonPanel);
         toolPanel.add(choicesPanel);
 
@@ -236,7 +265,8 @@ public class MainFrame extends JFrame{
         mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         mainPanel.add(toolPanel, BorderLayout.WEST);
         mainPanel.add(contentPane, BorderLayout.CENTER);
-        mainPanel.add(statusBar, BorderLayout.SOUTH);
+        mainPanel.add(statusBar, BorderLayout.SOUTH);       
+        mainPanel.setBackground(Color.WHITE);
 
         f.add(mainPanel);
 
