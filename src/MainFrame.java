@@ -4,6 +4,8 @@ import java.awt.event.ActionListener;
 import java.util.Hashtable;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 public class MainFrame extends JFrame{
 
@@ -26,11 +28,10 @@ public class MainFrame extends JFrame{
     }
 
     public static void setStatusText(String statusText) {
-        statusBar.setText(statusText + " was selected last.
-        ");
+        statusBar.setText(statusText + " was selected last.");
     }
 
-    public static void main(String[] args) {
+    private static void runGUI() {
 
         /*JFrame */
         f = new JFrame("Music Editor");
@@ -109,24 +110,14 @@ public class MainFrame extends JFrame{
         buttonPanel.setOpaque(false);
 
 
-        /*Selection of exit option */
-        exitMenuItem.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                statusBar.setText("Exit was selected.");
+        /*Selection of exit menu item */
+        exitMenuItem.addActionListener(e -> {
+                setStatusText("Exit");
                 f.dispose();
-            }
-            
         });
 
-
-        /*Selection of delete option */
-        deleteMenuItem.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-              
+        /*Selection of delete menu item */
+        deleteMenuItem.addActionListener(e -> {              
                 numStaves = numStaves - 1;
                 setStatusText("Delete Staff");
                 stavesInfo.setText("My Music Editor. Showing " + numStaves + " staves.");
@@ -134,96 +125,107 @@ public class MainFrame extends JFrame{
                     deleteMenuItem.setEnabled(false);
                     btnDelete.setEnabled(false);                    
                 }
-
-            }
-            
         });
 
-
-        /*Selection of new option */
-        newMenuItem.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                
+        /*Selection of new menu item */
+        newMenuItem.addActionListener(e -> {                
                 numStaves = numStaves + 1;
                 if(numStaves>1){
                     deleteMenuItem.setEnabled(true);
                     btnDelete.setEnabled(false);
                 }
-                setStatusText("New Staff");
-                
-            }
-            
+                setStatusText("New Staff");               
         });
 
+        /*Selection of select button*/
+        btnSelect.addActionListener(e -> {
+                setStatusText("Select Button");
+        });
+        
+        /*Selection of pen button*/
+        btnPen.addActionListener(e -> {
+                setStatusText("Pen Button");
+        });
 
-        /*Selection of delete option */
-        btnDelete.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                
+        /*Selection of delete button */
+        btnDelete.addActionListener(e -> {                
                 numStaves = numStaves - 1;
                 if(numStaves==1){
                     deleteMenuItem.setEnabled(false);
                     btnDelete.setEnabled(false);
                 }
-                statusBar.setText("Delete Staff was selected.");
+                setStatusText("Delete Staff");
                 stavesInfo.setText("My Music Editor. Showing " + numStaves + " staves.");
-            }
-            
         });
 
-
-        /*Selection of new option */
-        btnNew.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                
+        /*Selection of new button */
+        btnNew.addActionListener(e -> {                
                 numStaves = numStaves + 1;
                 if(numStaves>1){
                     deleteMenuItem.setEnabled(true);
                     btnDelete.setEnabled(true);
                 }
-                statusBar.setText("New Staff was selected.");
+                setStatusText("New Staff");
                 stavesInfo.setText("My Music Editor. Showing " + numStaves + " staves.");
-                
-            }
-            
+        });
+
+        /*Selection of play button*/
+        btnPlay.addActionListener(e -> {
+                setStatusText("Play Button");
+        });
+        
+        /*Selection of stop button*/
+        btnStop.addActionListener(e -> {
+                setStatusText("Stop Button");
         });
 
 
         /*Radio Panel */
-        JRadioButton option1 = new JRadioButton();
-        JRadioButton option2 = new JRadioButton();
-        JRadioButton option3 = new JRadioButton();
-        JRadioButton option4 = new JRadioButton();
+        JRadioButton option1 = new JRadioButton("Note");
+        JRadioButton option2 = new JRadioButton("Rest");
+        JRadioButton option3 = new JRadioButton("Flat");
+        JRadioButton option4 = new JRadioButton("Sharp");
         ButtonGroup notation = new ButtonGroup();
         JPanel radioPanel = new JPanel();
+
         radioPanel.setLayout((new GridLayout(4, 1, 0, 1)));
+        radioPanel.setOpaque(false);
         option1.setOpaque(false);
         option2.setOpaque(false);
         option3.setOpaque(false);
         option4.setOpaque(false);
-        radioPanel.setOpaque(false);
-
+        
         notation.add(option1);
         notation.add(option2);
         notation.add(option3);
         notation.add(option4);
         
-        option1.setText("Note");
-        option2.setText("Rest");
-        option3.setText("Flat");
-        option4.setText("Sharp");
         option1.setSelected(true);
 
         radioPanel.add(option1);
         radioPanel.add(option2);
         radioPanel.add(option3);
         radioPanel.add(option4);
+
+        /*Selection of option1*/
+        option1.addActionListener(e -> {
+            setStatusText("Note");
+        });
+        
+        /*Selection of option2*/
+        option2.addActionListener(e -> {
+                setStatusText("Rest");
+        }); 
+
+        /*Selection of option3*/
+        option3.addActionListener(e -> {
+            setStatusText("Flat");
+        });
+        
+        /*Selection of option4*/
+        option4.addActionListener(e -> {
+                setStatusText("Sharp");
+        }); 
 
 
         /*Slider Panel */
@@ -233,13 +235,46 @@ public class MainFrame extends JFrame{
         duration.setPaintTicks(true);
         
         Hashtable<Integer, JLabel> labels = new Hashtable<Integer, JLabel>();
-        labels.put(0, new JLabel("Whole"));        
+        labels.put(0, new JLabel("Whole"));       
         labels.put(1, new JLabel("Half"));
         labels.put(2, new JLabel("Quarter"));
         labels.put(3, new JLabel("Eighth"));
         labels.put(4, new JLabel("Sixteenth"));
         duration.setLabelTable(labels);
         duration.setPaintLabels(true);
+        
+        duration.addChangeListener(new ChangeListener() {
+
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                setStatusText(labels.get(duration.getValue()).getText());                
+            }
+            
+        });
+        // /*Selection of option1*/
+        // option1.addActionListener(e -> {
+        //     setStatusText("Note");
+        // });
+        
+        // /*Selection of option2*/
+        // option2.addActionListener(e -> {
+        //         setStatusText("Rest");
+        // }); 
+
+        // /*Selection of option3*/
+        // option3.addActionListener(e -> {
+        //     setStatusText("Flat");
+        // });
+        
+        // /*Selection of option4*/
+        // option4.addActionListener(e -> {
+        //         setStatusText("Sharp");
+        // }); 
+
+        // /*Selection of option5*/
+        // option4.addActionListener(e -> {
+        //     setStatusText("Sharp");
+        // });     
 
 
         /*Choices Panel */
@@ -278,5 +313,13 @@ public class MainFrame extends JFrame{
         f.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         f.setVisible(true);
     }
+
+    public static void main(String[] args) {
+		javax.swing.SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				runGUI();
+			}
+		});
+	}
 
 }
