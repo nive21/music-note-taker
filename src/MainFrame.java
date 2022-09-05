@@ -1,6 +1,4 @@
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Hashtable;
 
 import javax.swing.*;
@@ -119,12 +117,12 @@ public class MainFrame extends JFrame{
         /*Selection of delete menu item */
         deleteMenuItem.addActionListener(e -> {              
                 numStaves = numStaves - 1;
-                setStatusText("Delete Staff");
-                stavesInfo.setText("My Music Editor. Showing " + numStaves + " staves.");
                 if(numStaves==1){
                     deleteMenuItem.setEnabled(false);
                     btnDelete.setEnabled(false);                    
-                }
+                }                
+                setStatusText("Delete Staff");
+                stavesInfo.setText("My Music Editor. Showing " + numStaves + " staves.");
         });
 
         /*Selection of new menu item */
@@ -132,9 +130,10 @@ public class MainFrame extends JFrame{
                 numStaves = numStaves + 1;
                 if(numStaves>1){
                     deleteMenuItem.setEnabled(true);
-                    btnDelete.setEnabled(false);
+                    btnDelete.setEnabled(true);
                 }
-                setStatusText("New Staff");               
+                setStatusText("New Staff");   
+                stavesInfo.setText("My Music Editor. Showing " + numStaves + " staves.");            
         });
 
         /*Selection of select button*/
@@ -251,30 +250,6 @@ public class MainFrame extends JFrame{
             }
             
         });
-        // /*Selection of option1*/
-        // option1.addActionListener(e -> {
-        //     setStatusText("Note");
-        // });
-        
-        // /*Selection of option2*/
-        // option2.addActionListener(e -> {
-        //         setStatusText("Rest");
-        // }); 
-
-        // /*Selection of option3*/
-        // option3.addActionListener(e -> {
-        //     setStatusText("Flat");
-        // });
-        
-        // /*Selection of option4*/
-        // option4.addActionListener(e -> {
-        //         setStatusText("Sharp");
-        // }); 
-
-        // /*Selection of option5*/
-        // option4.addActionListener(e -> {
-        //     setStatusText("Sharp");
-        // });     
 
 
         /*Choices Panel */
