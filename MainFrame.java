@@ -56,7 +56,7 @@ public class MainFrame extends JFrame{
 
     ////Setting status bar text
     public static void setStatusText(String statusText) {
-        statusBar.setText(statusText + " was selected last. " + dragPoint);
+        statusBar.setText(statusText + " was selected last. ");
     }
 
     ////Setting central text
@@ -202,19 +202,22 @@ public class MainFrame extends JFrame{
         
         void draw(Graphics g, Integer y, Boolean last){
             g.drawLine(50, 0+y, 1050, 0+y);
-            g.drawLine(50, 15+y, 1050, 15+y);
-            g.drawLine(50, 30+y, 1050, 30+y);
-            g.drawLine(50, 45+y, 1050, 45+y);
-            g.drawLine(50, 60+y, 1050, 60+y);
-            g.drawImage(trebleClef, 60, y-25, 60, 115, null);
-            g.drawImage(commonTime, 120, y+8, 25, 45, null);
-            g.drawLine(50, 0+y, 50, 60+y);
+            g.drawLine(50, 13+y, 1050, 13+y);
+            g.drawLine(50, 26+y, 1050, 26+y);
+            g.drawLine(50, 39+y, 1050, 39+y);
+            g.drawLine(50, 52+y, 1050, 52+y);
+            g.drawImage(trebleClef, 60, y-22, 50, 100, null);
+            g.drawImage(commonTime, 110, y+8, 20, 38, null);
+            g.drawLine(50, 0+y, 50, 52+y);
+            g.drawLine(400, 0+y, 400, 52+y);
+            g.drawLine(750, 0+y, 750, 52+y);
 
             if (last == true){
+                g.drawLine(1040, 0+y, 1040, 52+y);
                 ((Graphics2D) g).setStroke(new BasicStroke(8f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL));
-                g.drawLine(1050, 0+y, 1050, 60+y);
+                g.drawLine(1050, 0+y, 1050, 52+y);
             } else {
-                g.drawLine(1050, 0+y, 1050, 60+y);
+                g.drawLine(1050, 0+y, 1050, 52+y);
             }
         }
 
@@ -254,7 +257,7 @@ public class MainFrame extends JFrame{
         @Override
         public void mousePressed(MouseEvent e) {
             dragPoint = new Point(e.getX(), e.getY());
-            setStatusText("dragging");
+            // setStatusText("dragging");
             repaint();
         }
 
@@ -262,7 +265,7 @@ public class MainFrame extends JFrame{
         @Override
         public void mouseReleased(MouseEvent e) {
             symbolMap.put(new Point(e.getX(), e.getY()), imageMap.get(labels.get(duration.getValue()).getText() + symbol + "Image"));
-            setStatusText("mouseclicked");
+            // setStatusText("mouseclicked");
             repaint();
         }
 
@@ -282,7 +285,7 @@ public class MainFrame extends JFrame{
         @Override
         public void mouseDragged(MouseEvent e) {
             dragPoint = new Point(e.getX(), e.getY());
-            setStatusText("dragging");
+            // setStatusText("dragging");
             repaint();
         }
 
