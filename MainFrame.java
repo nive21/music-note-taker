@@ -4,7 +4,6 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.Enumeration;
 import java.util.Hashtable;
 import java.awt.Point;
 
@@ -14,8 +13,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.MouseInputListener;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
-import javax.swing.table.*;
 
 public class MainFrame extends JFrame{
 
@@ -55,6 +52,8 @@ public class MainFrame extends JFrame{
     static Integer offsetY = 0;
     static Integer lengthX = 10;
     static Integer lengthY = 30;
+    static Integer mouseOffsetX = 0;
+    static Integer mouseOffsetY = 0;
 
 
     static String[] columns = new String[] {
@@ -149,20 +148,20 @@ public class MainFrame extends JFrame{
         } 
         if (symbol == "Rest"){
             if (durationNote == "Whole"){
-                lengthX = -5;
-                lengthY = -5;
+                lengthX = 20;
+                lengthY = 10;
             } else if (durationNote == "Half"){
-                lengthX = -5;
-                lengthY = -5;
+                lengthX = 20;
+                lengthY = 10;
             } else if (durationNote == "Quarter"){
-                lengthX = -5;
-                lengthY = -5;
+                lengthX = 11;
+                lengthY = 28;
             } else if (durationNote == "Eighth"){
-                lengthX = -5;
-                lengthY = -5;
+                lengthX = 10;
+                lengthY = 20;
             } else if (durationNote == "Sixteenth"){
-                lengthX = -5;
-                lengthY = -5;
+                lengthX = 13;
+                lengthY = 27;
             }
         } 
     }
@@ -369,9 +368,7 @@ public class MainFrame extends JFrame{
             if (!(dragPoint.x==0 && dragPoint.y==0)){
                 if (selectMode == false){
                     g.drawImage(imageMap.get(labels.get(duration.getValue()).getText() + symbol + "Image"), dragPoint.x, dragPoint.y, null);                               
-                } else if (idSymbolSelected != -1) {
-    
-                }    
+                }
             }
 
             // if (!(dragPoint.x==0 && dragPoint.y==0)){
@@ -394,17 +391,19 @@ public class MainFrame extends JFrame{
                 repaint();
             } else {
                 
-                setStatusText("Pressed; looking for selecetd symbol.");
+                setStatusText("Pressed; looking for selected symbol.");
                 idSymbolSelected = -1;
                 for (int i=numRows-1; i>=0; i--){
-                    offsetSymbol((String) symbolTable.getModel().getValueAt(i, 4));
+                    lengthSymbol((String) symbolTable.getModel().getValueAt(i, 4));
                     int symbolX = (int) symbolTable.getModel().getValueAt(i, 2);
                     int symbolY = (int) symbolTable.getModel().getValueAt(i, 3);
-                    int mouseX = e.getX() + offsetX;
-                    int mouseY = e.getY() + offsetY;
+                    int mouseX = e.getX();
+                    int mouseY = e.getY();
                     // g.drawImage(imageMap.get(symbolTable.getModel().getValueAt(i, 1)), (int) symbolTable.getModel().getValueAt(i, 2), (int) symbolTable.getModel().getValueAt(i, 3),null);
-                    if ( mouseX < symbolX + 50 && mouseX > symbolX - 50 && mouseY < symbolY + 50 && mouseY > symbolY -50 ){
+                    if ( mouseX < symbolX + lengthX + 5  && mouseX > symbolX - 5 && mouseY < symbolY + lengthY + 5 && mouseY > symbolY - 5 ){
                         idSymbolSelected = i;
+                        mouseOffsetX = mouseX - symbolX;
+                        mouseOffsetY = mouseY - symbolY;
                         setStatusText("selected " + i + " at "+ e.getX());
                         repaint();
                         break;
@@ -480,8 +479,8 @@ public class MainFrame extends JFrame{
                 
             } else if (idSymbolSelected != -1) {
                 // offsetSymbol((String) symbolTable.getModel().getValueAt(idSymbolSelected, 4));
-                model.setValueAt(e.getX() + offsetX, idSymbolSelected, 2);
-                model.setValueAt(e.getY() + offsetY, idSymbolSelected, 3);
+                model.setValueAt(e.getX() - mouseOffsetX, idSymbolSelected, 2);
+                model.setValueAt(e.getY() - mouseOffsetY, idSymbolSelected, 3);
             }    
             repaint();                 
         }
