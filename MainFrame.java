@@ -53,6 +53,8 @@ public class MainFrame extends JFrame{
     static Integer idSymbolSelected = -1;
     static Integer offsetX = 0;
     static Integer offsetY = 0;
+    static Integer lengthX = 10;
+    static Integer lengthY = 30;
 
 
     static String[] columns = new String[] {
@@ -91,19 +93,76 @@ public class MainFrame extends JFrame{
         if (symbol == "Note"){
             if (durationNote == "Whole"){
                 offsetX = -10;
-                offsetY = -10;
+                offsetY = -5;
             } else if (durationNote == "Half"){
-                offsetX = -10;
-                offsetY = -15;
+                offsetX = -15;
+                offsetY = -32;
             } else if (durationNote == "Quarter"){
-                offsetX = -10;
-                offsetY = -15;
+                offsetX = -6;
+                offsetY = -32;
             } else if (durationNote == "Eighth"){
-                offsetX = -10;
-                offsetY = -15;
+                offsetX = -15;
+                offsetY = -34;
             } else if (durationNote == "Sixteenth"){
-                offsetX = -10;
-                offsetY = -15;
+                offsetX = -6;
+                offsetY = -34;
+            }
+        } 
+        if (symbol == "Rest"){
+            if (durationNote == "Whole"){
+                offsetX = -5;
+                offsetY = -5;
+            } else if (durationNote == "Half"){
+                offsetX = -5;
+                offsetY = -5;
+            } else if (durationNote == "Quarter"){
+                offsetX = -5;
+                offsetY = -5;
+            } else if (durationNote == "Eighth"){
+                offsetX = -5;
+                offsetY = -5;
+            } else if (durationNote == "Sixteenth"){
+                offsetX = -5;
+                offsetY = -5;
+            }
+        } 
+    }
+
+    public static void lengthSymbol(String durationNote){
+        if (symbol == "Note"){
+            if (durationNote == "Whole"){
+                lengthX = 19;
+                lengthY = 11;
+            } else if (durationNote == "Half"){
+                lengthX = 30;
+                lengthY = 40;
+            } else if (durationNote == "Quarter"){
+                lengthX = 13;
+                lengthY = 40;
+            } else if (durationNote == "Eighth"){
+                lengthX = 40;
+                lengthY = 40;
+            } else if (durationNote == "Sixteenth"){
+                lengthX = 22;
+                lengthY = 40;
+            }
+        } 
+        if (symbol == "Rest"){
+            if (durationNote == "Whole"){
+                lengthX = -5;
+                lengthY = -5;
+            } else if (durationNote == "Half"){
+                lengthX = -5;
+                lengthY = -5;
+            } else if (durationNote == "Quarter"){
+                lengthX = -5;
+                lengthY = -5;
+            } else if (durationNote == "Eighth"){
+                lengthX = -5;
+                lengthY = -5;
+            } else if (durationNote == "Sixteenth"){
+                lengthX = -5;
+                lengthY = -5;
             }
         } 
     }
@@ -300,9 +359,10 @@ public class MainFrame extends JFrame{
                 // g.translate(-10, -10);
                 g.drawImage(imageMap.get(symbolTable.getModel().getValueAt(i, 1)), drawX, drawY,null);
                 if (i == idSymbolSelected){
+                    lengthSymbol((String) symbolTable.getModel().getValueAt(i, 4));
                     ((Graphics2D) g).setStroke(new BasicStroke(2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL));
                     g.setColor(java.awt.Color.red);
-                    g.drawRect(drawX, drawY, 60, 100);
+                    g.drawRect(drawX , drawY , lengthX, lengthY);
                 }
             }
 
@@ -333,7 +393,6 @@ public class MainFrame extends JFrame{
                 dragPoint = new Point(e.getX() + offsetX, e.getY() + offsetY);
                 repaint();
             } else {
-
                 
                 setStatusText("Pressed; looking for selecetd symbol.");
                 idSymbolSelected = -1;
@@ -344,9 +403,10 @@ public class MainFrame extends JFrame{
                     int mouseX = e.getX() + offsetX;
                     int mouseY = e.getY() + offsetY;
                     // g.drawImage(imageMap.get(symbolTable.getModel().getValueAt(i, 1)), (int) symbolTable.getModel().getValueAt(i, 2), (int) symbolTable.getModel().getValueAt(i, 3),null);
-                    if ( mouseX < symbolX + 50 && mouseX > symbolX -50 && mouseY < symbolY + 50 && mouseY > symbolY -50 ){
+                    if ( mouseX < symbolX + 50 && mouseX > symbolX - 50 && mouseY < symbolY + 50 && mouseY > symbolY -50 ){
                         idSymbolSelected = i;
                         setStatusText("selected " + i + " at "+ e.getX());
+                        repaint();
                         break;
                     }
                 }       
@@ -367,17 +427,6 @@ public class MainFrame extends JFrame{
                 model.addRow(new Object[]{numRows, durationNote + symbol + "Image", x , y, durationNote});
                 int actualY = 0;
                 if (symbol == "Note"){
-                    // if (durationNote == "Whole"){
-                    //     actualY = (y + 5)%104;
-                    // } else if (durationNote == "Half"){
-                    //     actualY = (y + 34)%104;
-                    // } else if (durationNote == "Quarter"){
-                    //     actualY = (y + 34)%104;
-                    // } else if (durationNote == "Eighth"){
-                    //     actualY = (y + 34)%104;
-                    // } else if (durationNote == "Sixteenth"){
-                    //     actualY = (y + 34)%104;
-                    // }
         
                     //E4, F4, G4, A5, B5, C5, D5, E5, and F5
                     if (actualY >= 101 || actualY <= 3){
@@ -636,6 +685,7 @@ public class MainFrame extends JFrame{
         /*Selection of pen button*/
         btnPen.addActionListener(e -> {
                 setStatusText("Pen Button");
+                selectMode = false;
         });
 
 
