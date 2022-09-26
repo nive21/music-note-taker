@@ -1,4 +1,6 @@
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -48,8 +50,10 @@ public class MainFrame extends JFrame{
     static String symbol = "Note";
     static String imageSelection = "HalfNoteImage";
     static Point dragPoint = new Point(0, 0);
-    static Boolean symbolSelected = false;
     static Integer idSymbolSelected = -1;
+    static Integer offsetX = 0;
+    static Integer offsetY = 0;
+
 
     static String[] columns = new String[] {
         "Id", "Name", "x", "y", "Duration"
@@ -81,6 +85,27 @@ public class MainFrame extends JFrame{
     ////Setting central text
     public static void setCentraltext(){
         stavesInfo.setText("My Music Editor. Showing " + pageStaves.get(curPage) + " staves (Page " + curPage + " of " + numPages + ")");
+    }
+
+    public static void offsetSymbol(String durationNote){
+        if (symbol == "Note"){
+            if (durationNote == "Whole"){
+                offsetX = -10;
+                offsetY = -10;
+            } else if (durationNote == "Half"){
+                offsetX = -10;
+                offsetY = -15;
+            } else if (durationNote == "Quarter"){
+                offsetX = -10;
+                offsetY = -15;
+            } else if (durationNote == "Eighth"){
+                offsetX = -10;
+                offsetY = -15;
+            } else if (durationNote == "Sixteenth"){
+                offsetX = -10;
+                offsetY = -15;
+            }
+        } 
     }
 
     ////Enables or disables delete staff buttons
@@ -184,7 +209,7 @@ public class MainFrame extends JFrame{
     }
 
 
-    static class MusicView extends JComponent implements MouseInputListener{   
+    static class MusicView extends JComponent implements MouseInputListener, KeyListener{   
         
         final BufferedImage trebleClef, commonTime, flatImage, sharpImage, naturalImage;
         final BufferedImage SixteenthNoteImage, EighthNoteImage, QuarterNoteImage, HalfNoteImage, WholeNoteImage;
@@ -227,6 +252,7 @@ public class MainFrame extends JFrame{
 
             this.addMouseListener(this);
             this.addMouseMotionListener(this);
+            this.addKeyListener(this);
 
         }
                
@@ -269,7 +295,15 @@ public class MainFrame extends JFrame{
 
 
             for (int i=0; i<numRows; i++){
-                g.drawImage(imageMap.get(symbolTable.getModel().getValueAt(i, 1)), (int) symbolTable.getModel().getValueAt(i, 2), (int) symbolTable.getModel().getValueAt(i, 3),null);
+                int drawX = (int) symbolTable.getModel().getValueAt(i, 2);
+                int drawY = (int) symbolTable.getModel().getValueAt(i, 3);
+                // g.translate(-10, -10);
+                g.drawImage(imageMap.get(symbolTable.getModel().getValueAt(i, 1)), drawX, drawY,null);
+                if (i == idSymbolSelected){
+                    ((Graphics2D) g).setStroke(new BasicStroke(2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL));
+                    g.setColor(java.awt.Color.red);
+                    g.drawRect(drawX, drawY, 60, 100);
+                }
             }
 
             if (!(dragPoint.x==0 && dragPoint.y==0)){
@@ -295,19 +329,22 @@ public class MainFrame extends JFrame{
         public void mousePressed(MouseEvent e) {
             
             if (selectMode == false){
-                dragPoint = new Point(e.getX(), e.getY());
+                offsetSymbol(labels.get(duration.getValue()).getText());
+                dragPoint = new Point(e.getX() + offsetX, e.getY() + offsetY);
                 repaint();
             } else {
 
+                
                 setStatusText("Pressed; looking for selecetd symbol.");
+                idSymbolSelected = -1;
                 for (int i=numRows-1; i>=0; i--){
+                    offsetSymbol((String) symbolTable.getModel().getValueAt(i, 4));
                     int symbolX = (int) symbolTable.getModel().getValueAt(i, 2);
                     int symbolY = (int) symbolTable.getModel().getValueAt(i, 3);
-                    int mouseX = e.getX();
-                    int mouseY = e.getY();
+                    int mouseX = e.getX() + offsetX;
+                    int mouseY = e.getY() + offsetY;
                     // g.drawImage(imageMap.get(symbolTable.getModel().getValueAt(i, 1)), (int) symbolTable.getModel().getValueAt(i, 2), (int) symbolTable.getModel().getValueAt(i, 3),null);
                     if ( mouseX < symbolX + 50 && mouseX > symbolX -50 && mouseY < symbolY + 50 && mouseY > symbolY -50 ){
-                        symbolSelected = true;
                         idSymbolSelected = i;
                         setStatusText("selected " + i + " at "+ e.getX());
                         break;
@@ -323,24 +360,24 @@ public class MainFrame extends JFrame{
 
 
             if (selectMode == false){
-                int x = e.getX();
-                int y = e.getY();
+                int x = e.getX() + offsetX;
+                int y = e.getY() + offsetY;
                 numRows += 1;
                 String durationNote = labels.get(duration.getValue()).getText();
                 model.addRow(new Object[]{numRows, durationNote + symbol + "Image", x , y, durationNote});
                 int actualY = 0;
                 if (symbol == "Note"){
-                    if (durationNote == "Whole"){
-                        actualY = (y + 5)%104;
-                    } else if (durationNote == "Half"){
-                        actualY = (y + 34)%104;
-                    } else if (durationNote == "Quarter"){
-                        actualY = (y + 34)%104;
-                    } else if (durationNote == "Eighth"){
-                        actualY = (y + 34)%104;
-                    } else if (durationNote == "Sixteenth"){
-                        actualY = (y + 34)%104;
-                    }
+                    // if (durationNote == "Whole"){
+                    //     actualY = (y + 5)%104;
+                    // } else if (durationNote == "Half"){
+                    //     actualY = (y + 34)%104;
+                    // } else if (durationNote == "Quarter"){
+                    //     actualY = (y + 34)%104;
+                    // } else if (durationNote == "Eighth"){
+                    //     actualY = (y + 34)%104;
+                    // } else if (durationNote == "Sixteenth"){
+                    //     actualY = (y + 34)%104;
+                    // }
         
                     //E4, F4, G4, A5, B5, C5, D5, E5, and F5
                     if (actualY >= 101 || actualY <= 3){
@@ -388,10 +425,14 @@ public class MainFrame extends JFrame{
         @Override
         public void mouseDragged(MouseEvent e) {
             if (selectMode == false){
-                dragPoint = new Point(e.getX(), e.getY());
+                // offsetSymbol(labels.get(duration.getValue()).getText());
+                dragPoint = new Point(e.getX() + offsetX, e.getY() + offsetY);
+                
+                
             } else if (idSymbolSelected != -1) {
-                model.setValueAt(e.getX(), idSymbolSelected, 2);
-                model.setValueAt(e.getY(), idSymbolSelected, 3);
+                // offsetSymbol((String) symbolTable.getModel().getValueAt(idSymbolSelected, 4));
+                model.setValueAt(e.getX() + offsetX, idSymbolSelected, 2);
+                model.setValueAt(e.getY() + offsetY, idSymbolSelected, 3);
             }    
             repaint();                 
         }
@@ -400,6 +441,29 @@ public class MainFrame extends JFrame{
         @Override
         public void mouseMoved(MouseEvent e) {
             
+        }
+
+
+        @Override
+        public void keyTyped(KeyEvent e) {
+            
+        }
+
+
+        @Override
+        public void keyPressed(KeyEvent e) {
+            
+        }
+
+
+        @Override
+        public void keyReleased(KeyEvent e) {
+            if (idSymbolSelected != -1){
+                if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE || e.getKeyCode() == KeyEvent.VK_DELETE){
+                    model.removeRow(idSymbolSelected);
+                    repaint();
+                }
+            }
         }
     }
 
