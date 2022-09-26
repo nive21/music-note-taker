@@ -161,6 +161,7 @@ public class MainFrame extends JFrame{
         updateNextPrev();
         setCentraltext(); 
         setStatusText("Next page");  
+        setSizeMusicView();
     }
 
     public static void prevPage() {
@@ -168,6 +169,15 @@ public class MainFrame extends JFrame{
         updateNextPrev();
         setCentraltext(); 
         setStatusText("Previous page");
+        setSizeMusicView();
+    }
+
+    public static void setSizeMusicView(){
+        int heightMusicView = (int) pageStaves.get(curPage)*104 + 156;
+        music.setSize(1100, heightMusicView);
+        setPitchStatusText(pageStaves.get(curPage) + "staves" + heightMusicView);
+        music.setPreferredSize(new Dimension(1100, heightMusicView));
+        content.setBorder(BorderFactory.createEmptyBorder(52, 50, 52, 50));
     }
 
 
@@ -251,7 +261,7 @@ public class MainFrame extends JFrame{
                 if ( i == pageStaves.get(curPage)-1 ){
                     last = true;
                 }
-                draw(g, 100 + i*ht, last);
+                draw(g, 104 + i*ht, last);
             }            
 
             // Enumeration<Point> e = symbolMap.keys();
@@ -295,15 +305,15 @@ public class MainFrame extends JFrame{
             int actualY = 0;
             
             if (durationNote == "Whole"){
-                actualY = (y + 9)%104;
+                actualY = (y + 5)%104;
             } else if (durationNote == "Half"){
-                actualY = (y + 38)%104;
+                actualY = (y + 34)%104;
             } else if (durationNote == "Quarter"){
-                actualY = (y + 38)%104;
+                actualY = (y + 34)%104;
             } else if (durationNote == "Eighth"){
-                actualY = (y + 38)%104;
+                actualY = (y + 34)%104;
             } else if (durationNote == "Sixteenth"){
-                actualY = (y + 38)%104;
+                actualY = (y + 34)%104;
             }
 
             //E4, F4, G4, A5, B5, C5, D5, E5, and F5
@@ -369,7 +379,9 @@ public class MainFrame extends JFrame{
         }
         setStatusText("New Staff");
         setCentraltext(); 
+        setSizeMusicView();
         music.repaint();
+        
     }
 
     public static void deleteStaff() {
@@ -381,6 +393,7 @@ public class MainFrame extends JFrame{
         }
         setStatusText("Delete Staff");
         setCentraltext();    
+        setSizeMusicView();
         music.repaint();     
     }
 
@@ -406,11 +419,9 @@ public class MainFrame extends JFrame{
         
         music = new MusicView();
         content.add(music); 
-        music.setSize(1100, 1100);
-        music.setPreferredSize(new Dimension(1100, 1100));
+        setSizeMusicView();
         music.setMinimumSize(new Dimension(50,50));        
-        content.setBorder(BorderFactory.createEmptyBorder(52, 50, 52, 50));
-        // stavesInfo.setHorizontalAlignment(JLabel.CENTER);
+                // stavesInfo.setHorizontalAlignment(JLabel.CENTER);
         // setCentraltext();  
         
         
