@@ -41,12 +41,15 @@ public class MainFrame extends JFrame{
     static JButton btnNew, btnDelete, btnAddPage, btnDeletePage, btnNextPage, btnPrevPage;    
     static JPanel content;
     static MusicView music;
+    static boolean selectMode = false;
     // static ArrayList<Point> pointAdded = new ArrayList<>();
     // static ArrayList<BufferedImage> notesAdded = new ArrayList<>();
     static JSlider duration;
     static String symbol = "Note";
     static String imageSelection = "HalfNoteImage";
     static Point dragPoint = new Point(0, 0);
+    static Boolean symbolSelected = false;
+    static Integer idSymbolSelected = -1;
 
     static String[] columns = new String[] {
         "Id", "Name", "x", "y", "Duration"
@@ -175,7 +178,7 @@ public class MainFrame extends JFrame{
     public static void setSizeMusicView(){
         int heightMusicView = (int) pageStaves.get(curPage)*104 + 156;
         music.setSize(1100, heightMusicView);
-        setPitchStatusText(pageStaves.get(curPage) + "staves" + heightMusicView);
+        // setPitchStatusText(pageStaves.get(curPage) + "staves" + heightMusicView);
         music.setPreferredSize(new Dimension(1100, heightMusicView));
         content.setBorder(BorderFactory.createEmptyBorder(52, 50, 52, 50));
     }
@@ -264,20 +267,22 @@ public class MainFrame extends JFrame{
                 draw(g, 104 + i*ht, last);
             }            
 
-            // Enumeration<Point> e = symbolMap.keys();
-            // while (e.hasMoreElements()) {
-            //     Point key = e.nextElement();
-            //     g.drawImage(symbolMap.get(key), key.x, key.y,null);
-            // }
 
             for (int i=0; i<numRows; i++){
                 g.drawImage(imageMap.get(symbolTable.getModel().getValueAt(i, 1)), (int) symbolTable.getModel().getValueAt(i, 2), (int) symbolTable.getModel().getValueAt(i, 3),null);
             }
 
-
             if (!(dragPoint.x==0 && dragPoint.y==0)){
-                g.drawImage(imageMap.get(labels.get(duration.getValue()).getText() + symbol + "Image"), dragPoint.x, dragPoint.y, null);            
+                if (selectMode == false){
+                    g.drawImage(imageMap.get(labels.get(duration.getValue()).getText() + symbol + "Image"), dragPoint.x, dragPoint.y, null);                               
+                } else if (idSymbolSelected != -1) {
+    
+                }    
             }
+
+            // if (!(dragPoint.x==0 && dragPoint.y==0)){
+            //     g.drawImage(imageMap.get(labels.get(duration.getValue()).getText() + symbol + "Image"), dragPoint.x, dragPoint.y, null);            
+            // }
         }
 
 
@@ -288,57 +293,81 @@ public class MainFrame extends JFrame{
 
         @Override
         public void mousePressed(MouseEvent e) {
-            dragPoint = new Point(e.getX(), e.getY());
-            // setStatusText("dragging");
-            repaint();
+            
+            if (selectMode == false){
+                dragPoint = new Point(e.getX(), e.getY());
+                repaint();
+            } else {
+
+                setStatusText("Pressed; looking for selecetd symbol.");
+                for (int i=numRows-1; i>=0; i--){
+                    int symbolX = (int) symbolTable.getModel().getValueAt(i, 2);
+                    int symbolY = (int) symbolTable.getModel().getValueAt(i, 3);
+                    int mouseX = e.getX();
+                    int mouseY = e.getY();
+                    // g.drawImage(imageMap.get(symbolTable.getModel().getValueAt(i, 1)), (int) symbolTable.getModel().getValueAt(i, 2), (int) symbolTable.getModel().getValueAt(i, 3),null);
+                    if ( mouseX < symbolX + 50 && mouseX > symbolX -50 && mouseY < symbolY + 50 && mouseY > symbolY -50 ){
+                        symbolSelected = true;
+                        idSymbolSelected = i;
+                        setStatusText("selected " + i + " at "+ e.getX());
+                        break;
+                    }
+                }       
+            }
         }
 
 
         @Override
         public void mouseReleased(MouseEvent e) {
             // symbolMap.put(new Point(e.getX(), e.getY()), imageMap.get(labels.get(duration.getValue()).getText() + symbol + "Image"));
-            int x = e.getX();
-            int y = e.getY();
-            numRows += 1;
-            String durationNote = labels.get(duration.getValue()).getText();
-            model.addRow(new Object[]{numRows, durationNote + symbol + "Image", x , y, durationNote});
-            int actualY = 0;
-            
-            if (durationNote == "Whole"){
-                actualY = (y + 5)%104;
-            } else if (durationNote == "Half"){
-                actualY = (y + 34)%104;
-            } else if (durationNote == "Quarter"){
-                actualY = (y + 34)%104;
-            } else if (durationNote == "Eighth"){
-                actualY = (y + 34)%104;
-            } else if (durationNote == "Sixteenth"){
-                actualY = (y + 34)%104;
-            }
 
-            //E4, F4, G4, A5, B5, C5, D5, E5, and F5
-            if (actualY >= 101 || actualY <= 3){
-                setPitchStatusText("F5");
-            } else if (actualY >3 && actualY <= 10){
-                setPitchStatusText("E5");
-            } else if (actualY >10 && actualY <= 16){
-                setPitchStatusText("D5");
-            } else if (actualY >16 && actualY <= 23){
-                setPitchStatusText("C5");
-            } else if (actualY >23 && actualY <= 29){
-                setPitchStatusText("B5");
-            } else if (actualY >29 && actualY <= 36){
-                setPitchStatusText("A5");
-            } else if (actualY >36 && actualY <= 42){
-                setPitchStatusText("G4");
-            } else if (actualY >42 && actualY <= 49){
-                setPitchStatusText("F4");
-            } else if (actualY >49 && actualY <= 55){
-                setPitchStatusText("E4");
-            } else{
-                setPitchStatusText("The note is outside the staff area! The pitch cannot be identified.");
-            }
-            
+
+            if (selectMode == false){
+                int x = e.getX();
+                int y = e.getY();
+                numRows += 1;
+                String durationNote = labels.get(duration.getValue()).getText();
+                model.addRow(new Object[]{numRows, durationNote + symbol + "Image", x , y, durationNote});
+                int actualY = 0;
+                if (symbol == "Note"){
+                    if (durationNote == "Whole"){
+                        actualY = (y + 5)%104;
+                    } else if (durationNote == "Half"){
+                        actualY = (y + 34)%104;
+                    } else if (durationNote == "Quarter"){
+                        actualY = (y + 34)%104;
+                    } else if (durationNote == "Eighth"){
+                        actualY = (y + 34)%104;
+                    } else if (durationNote == "Sixteenth"){
+                        actualY = (y + 34)%104;
+                    }
+        
+                    //E4, F4, G4, A5, B5, C5, D5, E5, and F5
+                    if (actualY >= 101 || actualY <= 3){
+                        setPitchStatusText("F5");
+                    } else if (actualY >3 && actualY <= 10){
+                        setPitchStatusText("E5");
+                    } else if (actualY >10 && actualY <= 16){
+                        setPitchStatusText("D5");
+                    } else if (actualY >16 && actualY <= 23){
+                        setPitchStatusText("C5");
+                    } else if (actualY >23 && actualY <= 29){
+                        setPitchStatusText("B5");
+                    } else if (actualY >29 && actualY <= 36){
+                        setPitchStatusText("A5");
+                    } else if (actualY >36 && actualY <= 42){
+                        setPitchStatusText("G4");
+                    } else if (actualY >42 && actualY <= 49){
+                        setPitchStatusText("F4");
+                    } else if (actualY >49 && actualY <= 55){
+                        setPitchStatusText("E4");
+                    } else{
+                        setPitchStatusText("The note is outside the staff area! The pitch cannot be identified.");
+                    }
+                }         
+            }  else if (idSymbolSelected != -1){
+                setStatusText("selected");
+            }            
             // setStatusText("mouseclicked");
             repaint();
         }
@@ -358,14 +387,19 @@ public class MainFrame extends JFrame{
 
         @Override
         public void mouseDragged(MouseEvent e) {
-            dragPoint = new Point(e.getX(), e.getY());
-            // setStatusText("dragging");
-            repaint();
+            if (selectMode == false){
+                dragPoint = new Point(e.getX(), e.getY());
+            } else if (idSymbolSelected != -1) {
+                model.setValueAt(e.getX(), idSymbolSelected, 2);
+                model.setValueAt(e.getY(), idSymbolSelected, 3);
+            }    
+            repaint();                 
         }
 
 
         @Override
         public void mouseMoved(MouseEvent e) {
+            
         }
     }
 
@@ -532,6 +566,7 @@ public class MainFrame extends JFrame{
         /*Selection of select button*/
         btnSelect.addActionListener(e -> {
                 setStatusText("Select Button");
+                selectMode = true;
         });
         
         /*Selection of pen button*/
