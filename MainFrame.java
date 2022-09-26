@@ -11,6 +11,9 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.MouseInputListener;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+import javax.swing.table.*;
 
 public class MainFrame extends JFrame{
 
@@ -31,6 +34,7 @@ public class MainFrame extends JFrame{
     static Integer curPage = 1;
     static Integer defaultStaves = 4;
     static Integer numStaves;    
+    static Integer numRows = 0;
     static JLabel statusBar = new JLabel("No control selected.");
     static JLabel stavesInfo  = new JLabel("Loading...");
     static JMenuItem newMenuItem, deleteMenuItem, addPageMenuItem, deletePageMenuItem, nextPageMenuItem, prevPageMenuItem;
@@ -43,8 +47,16 @@ public class MainFrame extends JFrame{
     static String symbol = "Note";
     static String imageSelection = "HalfNoteImage";
     static Point dragPoint = new Point(0, 0);
-    
 
+    static String[] columns = new String[] {
+        "Id", "Name", "x", "y", "Duration"
+    };
+        
+    static Object[][] data = new Object[][] {
+    };
+
+    static DefaultTableModel model = new DefaultTableModel(data, columns);
+    static JTable symbolTable = new JTable(model);    
 
     ////Setting button style
     public static void setButtonProperties(JButton buttonName, String buttonDef) {
@@ -57,6 +69,10 @@ public class MainFrame extends JFrame{
     ////Setting status bar text
     public static void setStatusText(String statusText) {
         statusBar.setText(statusText + " was selected last. ");
+    }
+
+    public static void setPitchStatusText(String statusText) {
+        statusBar.setText(statusText + " is the pitch of the note added. ");
     }
 
     ////Setting central text
@@ -161,6 +177,8 @@ public class MainFrame extends JFrame{
         final BufferedImage SixteenthNoteImage, EighthNoteImage, QuarterNoteImage, HalfNoteImage, WholeNoteImage;
         final BufferedImage SixteenthRestImage, EighthRestImage, QuarterRestImage, HalfRestImage, WholeRestImage;
 
+        
+
         public MusicView() throws IOException{
 
             trebleClef = ImageIO.read(getClass().getResource("/images/trebleClef.png"));
@@ -222,7 +240,7 @@ public class MainFrame extends JFrame{
         }
 
         public void paintComponent(Graphics g){
-            Integer ht = 120;
+            Integer ht = 104;
             Boolean last = false;
             
             g.setColor(java.awt.Color.white);
@@ -236,10 +254,14 @@ public class MainFrame extends JFrame{
                 draw(g, 100 + i*ht, last);
             }            
 
-            Enumeration<Point> e = symbolMap.keys();
-            while (e.hasMoreElements()) {
-                Point key = e.nextElement();
-                g.drawImage(symbolMap.get(key), key.x, key.y,null);
+            // Enumeration<Point> e = symbolMap.keys();
+            // while (e.hasMoreElements()) {
+            //     Point key = e.nextElement();
+            //     g.drawImage(symbolMap.get(key), key.x, key.y,null);
+            // }
+
+            for (int i=0; i<numRows; i++){
+                g.drawImage(imageMap.get(symbolTable.getModel().getValueAt(i, 1)), (int) symbolTable.getModel().getValueAt(i, 2), (int) symbolTable.getModel().getValueAt(i, 3),null);
             }
 
 
@@ -264,7 +286,49 @@ public class MainFrame extends JFrame{
 
         @Override
         public void mouseReleased(MouseEvent e) {
-            symbolMap.put(new Point(e.getX(), e.getY()), imageMap.get(labels.get(duration.getValue()).getText() + symbol + "Image"));
+            // symbolMap.put(new Point(e.getX(), e.getY()), imageMap.get(labels.get(duration.getValue()).getText() + symbol + "Image"));
+            int x = e.getX();
+            int y = e.getY();
+            numRows += 1;
+            String durationNote = labels.get(duration.getValue()).getText();
+            model.addRow(new Object[]{numRows, durationNote + symbol + "Image", x , y, durationNote});
+            int actualY = 0;
+            
+            if (durationNote == "Whole"){
+                actualY = (y + 9)%104;
+            } else if (durationNote == "Half"){
+                actualY = (y + 38)%104;
+            } else if (durationNote == "Quarter"){
+                actualY = (y + 38)%104;
+            } else if (durationNote == "Eighth"){
+                actualY = (y + 38)%104;
+            } else if (durationNote == "Sixteenth"){
+                actualY = (y + 38)%104;
+            }
+
+            //E4, F4, G4, A5, B5, C5, D5, E5, and F5
+            if (actualY >= 101 || actualY <= 3){
+                setPitchStatusText("F5");
+            } else if (actualY >3 && actualY <= 10){
+                setPitchStatusText("E5");
+            } else if (actualY >10 && actualY <= 16){
+                setPitchStatusText("D5");
+            } else if (actualY >16 && actualY <= 23){
+                setPitchStatusText("C5");
+            } else if (actualY >23 && actualY <= 29){
+                setPitchStatusText("B5");
+            } else if (actualY >29 && actualY <= 36){
+                setPitchStatusText("A5");
+            } else if (actualY >36 && actualY <= 42){
+                setPitchStatusText("G4");
+            } else if (actualY >42 && actualY <= 49){
+                setPitchStatusText("F4");
+            } else if (actualY >49 && actualY <= 55){
+                setPitchStatusText("E4");
+            } else{
+                setPitchStatusText("The note is outside the staff area! The pitch cannot be identified.");
+            }
+            
             // setStatusText("mouseclicked");
             repaint();
         }
@@ -293,26 +357,6 @@ public class MainFrame extends JFrame{
         @Override
         public void mouseMoved(MouseEvent e) {
         }
-
-        // Hashtable<Integer, JLabel> labels = new Hashtable<Integer, JLabel>();
-        // labels.put(0, new JLabel("Whole"));       
-        // labels.put(1, new JLabel("Half"));
-        // labels.put(2, new JLabel("Quarter"));
-        // labels.put(3, new JLabel("Eighth"));
-        // labels.put(4, new JLabel("Sixteenth"));
-        // duration.setLabelTable(labels);
-        // duration.setPaintLabels(true);
-        
-        // duration.addChangeListener(new ChangeListener() {
-
-        //     @Override
-        //     public void stateChanged(ChangeEvent e) {
-        //         setStatusText(labels.get(duration.getValue()).getText());                
-        //     }
-            
-        // });
-
-
     }
 
     ////Methods for adding or deleting staff
@@ -365,7 +409,7 @@ public class MainFrame extends JFrame{
         music.setSize(1100, 1100);
         music.setPreferredSize(new Dimension(1100, 1100));
         music.setMinimumSize(new Dimension(50,50));        
-        content.setBorder(BorderFactory.createEmptyBorder(50, 50, 50, 50));
+        content.setBorder(BorderFactory.createEmptyBorder(52, 50, 52, 50));
         // stavesInfo.setHorizontalAlignment(JLabel.CENTER);
         // setCentraltext();  
         
