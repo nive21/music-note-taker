@@ -3,9 +3,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.List;
 import java.awt.Point;
 
 import javax.imageio.ImageIO;
@@ -26,7 +25,10 @@ public class MainFrame extends JFrame{
     
     static JFrame f;
     static JMenuBar menuBar;
+    static Hashtable<Integer, JLabel> labels = new Hashtable<Integer, JLabel>();
     static Hashtable<Integer, Integer> pageStaves = new Hashtable<Integer, Integer>();
+    static Hashtable<String, BufferedImage> imageMap = new Hashtable<String, BufferedImage>();
+    static Hashtable<Point, BufferedImage> symbolMap = new Hashtable<Point, BufferedImage>();
     static Integer numPages = 1;
     static Integer curPage = 1;
     static Integer defaultStaves = 4;
@@ -37,8 +39,12 @@ public class MainFrame extends JFrame{
     static JButton btnNew, btnDelete, btnAddPage, btnDeletePage, btnNextPage, btnPrevPage;    
     static JPanel content;
     static MusicView music;
-    static List<Point> pointAdded = new ArrayList<>();
-    static List<Point> notesAdded = new ArrayList<>();
+    // static ArrayList<Point> pointAdded = new ArrayList<>();
+    // static ArrayList<BufferedImage> notesAdded = new ArrayList<>();
+    static JSlider duration;
+    static String symbol = "Note";
+    static String imageSelection = "HalfNoteImage";
+    
     
 
 
@@ -52,7 +58,7 @@ public class MainFrame extends JFrame{
 
     ////Setting status bar text
     public static void setStatusText(String statusText) {
-        statusBar.setText(statusText + " was selected last. " + pointAdded);
+        statusBar.setText(statusText + " was selected last. ");
     }
 
     ////Setting central text
@@ -150,28 +156,54 @@ public class MainFrame extends JFrame{
         setStatusText("Previous page");
     }
 
-    // BufferedImage trebleClefURL = ImageIO.read(MainFrame.class.getResource("images/trebleClef.png"));
-    // static Image trebleClefIcon =  new Image(trebleClefURL);
-    // BufferedImage trebleClefURL = ImageIO.read(getClass().getResource("/images/trebleClef.png"));
-    // static java.net.URL commonTimeURL = MainFrame.class.getResource("images/commonTime.png");        
-    // static Image commonTimeIcon =  new Image(commonTimeURL);
-
 
     static class MusicView extends JComponent implements MouseInputListener{   
         
-        final BufferedImage trebleClef, commonTime;
+        final BufferedImage trebleClef, commonTime, flatImage, sharpImage, naturalImage;
+        final BufferedImage SixteenthNoteImage, EighthNoteImage, QuarterNoteImage, HalfNoteImage, WholeNoteImage;
+        final BufferedImage SixteenthRestImage, EighthRestImage, QuarterRestImage, HalfRestImage, WholeRestImage;
         Integer lastNote = 0;
 
         public MusicView() throws IOException{
             trebleClef = ImageIO.read(getClass().getResource("/images/trebleClef.png"));
             commonTime = ImageIO.read(getClass().getResource("/images/commonTime.png"));
 
+            flatImage = ImageIO.read(getClass().getResource("/images/flat.png"));
+            sharpImage = ImageIO.read(getClass().getResource("/images/sharp.png"));
+            naturalImage = ImageIO.read(getClass().getResource("/images/natural.png"));
+
+            SixteenthNoteImage = ImageIO.read(getClass().getResource("/images/sixteenthNote.png"));
+            EighthNoteImage = ImageIO.read(getClass().getResource("/images/eighthNote.png"));
+            QuarterNoteImage = ImageIO.read(getClass().getResource("/images/quarterNote.png"));
+            HalfNoteImage = ImageIO.read(getClass().getResource("/images/halfNote.png"));
+            WholeNoteImage = ImageIO.read(getClass().getResource("/images/wholeNote.png"));
+
+            SixteenthRestImage = ImageIO.read(getClass().getResource("/images/sixteenthRest.png"));
+            EighthRestImage = ImageIO.read(getClass().getResource("/images/eighthRest.png"));
+            QuarterRestImage = ImageIO.read(getClass().getResource("/images/quarterRest.png"));
+            HalfRestImage = ImageIO.read(getClass().getResource("/images/halfRest.png"));
+            WholeRestImage = ImageIO.read(getClass().getResource("/images/wholeRest.png"));
+
+            imageMap.put("SixteenthNoteImage", SixteenthNoteImage);
+            imageMap.put("EighthNoteImage", EighthNoteImage);
+            imageMap.put("QuarterNoteImage", QuarterNoteImage);
+            imageMap.put("HalfNoteImage", HalfNoteImage);
+            imageMap.put("WholeNoteImage", WholeNoteImage);
+
+            imageMap.put("SixteenthRestImage", SixteenthRestImage);
+            imageMap.put("EighthRestImage", EighthRestImage);
+            imageMap.put("QuarterRestImage", QuarterRestImage);
+            imageMap.put("HalfRestImage", HalfRestImage);
+            imageMap.put("WholeRestImage", WholeRestImage);
+
             addMouseListener((MouseListener) new MouseInputAdapter() {
             
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    pointAdded.add(new Point(e.getX(), e.getY()));
-                    lastNote += 1;
+                    // pointAdded.add(new Point(e.getX(), e.getY()));
+                    // notesAdded.add((BufferedImage) imageMap.get(labels.get(duration.getValue()).getText() + symbol + "Image"));
+                    symbolMap.put(new Point(e.getX(), e.getY()), imageMap.get(labels.get(duration.getValue()).getText() + symbol + "Image"));
+                    // lastNote += 1;
                     setStatusText("mouseclicked");
                     repaint();
                 }
@@ -240,7 +272,6 @@ public class MainFrame extends JFrame{
             g.setColor(java.awt.Color.white);
             g.fillRect(0, 0, getWidth(), getHeight());
             g.setColor(java.awt.Color.black);
-            // g.drawLine(x1, y1, x2, y2);
             for (int i = 0; i < pageStaves.get(curPage) ; i++){
 
                 if ( i == pageStaves.get(curPage)-1 ){
@@ -248,11 +279,18 @@ public class MainFrame extends JFrame{
                 }
                 draw(g, 100 + i*ht, last);
             }            
-            
-            for (Point p : pointAdded){
-                // g.setColor(java.awt.Color.RED);
-                // g.fillOval(p.x, p.y, 35, 35);
+
+            Enumeration<Point> e = symbolMap.keys();
+            while (e.hasMoreElements()) {
+                Point key = e.nextElement();
+                g.drawImage(symbolMap.get(key), key.x, key.y, 60, 115, null);
             }
+            
+            // for (Point p : pointAdded){
+            //     // g.setColor(java.awt.Color.RED);
+            //     BufferedImage imageSelection = imageMap.get(labels.get(duration.getValue()).getText() + symbol + "Image");                 
+            //     g.drawImage(imageSelection, p.x, p.y, 60, 115, null);
+            // }
         }
 
 
@@ -321,8 +359,6 @@ public class MainFrame extends JFrame{
         //     }
             
         // });
-
-
 
 
     }
@@ -538,31 +574,34 @@ public class MainFrame extends JFrame{
         /*Selection of option1*/
         option1.addActionListener(e -> {
             setStatusText("Note");
+            symbol = "Note";
         });
         
         /*Selection of option2*/
         option2.addActionListener(e -> {
-                setStatusText("Rest");
+            setStatusText("Rest");
+            symbol = "Rest";
         }); 
 
         /*Selection of option3*/
         option3.addActionListener(e -> {
             setStatusText("Flat");
+            symbol = "Flat";
         });
         
         /*Selection of option4*/
         option4.addActionListener(e -> {
-                setStatusText("Sharp");
+            setStatusText("Sharp");
+            symbol = "Sharp";
         }); 
 
 
         /*Slider Panel */
-        JSlider duration = new JSlider(JSlider.VERTICAL, 0, 4, 1);
+        duration = new JSlider(JSlider.VERTICAL, 0, 4, 1);
         duration.setOpaque(false);
         duration.setMajorTickSpacing(1);
         duration.setPaintTicks(true);
         
-        Hashtable<Integer, JLabel> labels = new Hashtable<Integer, JLabel>();
         labels.put(0, new JLabel("Whole"));       
         labels.put(1, new JLabel("Half"));
         labels.put(2, new JLabel("Quarter"));
