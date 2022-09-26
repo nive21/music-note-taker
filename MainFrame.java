@@ -1,6 +1,5 @@
 import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Enumeration;
@@ -11,7 +10,6 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.event.MouseInputAdapter;
 import javax.swing.event.MouseInputListener;
 
 public class MainFrame extends JFrame{
@@ -44,7 +42,7 @@ public class MainFrame extends JFrame{
     static JSlider duration;
     static String symbol = "Note";
     static String imageSelection = "HalfNoteImage";
-    
+    static Point dragPoint = new Point(0, 0);
     
 
 
@@ -58,7 +56,7 @@ public class MainFrame extends JFrame{
 
     ////Setting status bar text
     public static void setStatusText(String statusText) {
-        statusBar.setText(statusText + " was selected last. ");
+        statusBar.setText(statusText + " was selected last. " + dragPoint);
     }
 
     ////Setting central text
@@ -162,9 +160,9 @@ public class MainFrame extends JFrame{
         final BufferedImage trebleClef, commonTime, flatImage, sharpImage, naturalImage;
         final BufferedImage SixteenthNoteImage, EighthNoteImage, QuarterNoteImage, HalfNoteImage, WholeNoteImage;
         final BufferedImage SixteenthRestImage, EighthRestImage, QuarterRestImage, HalfRestImage, WholeRestImage;
-        Integer lastNote = 0;
 
         public MusicView() throws IOException{
+
             trebleClef = ImageIO.read(getClass().getResource("/images/trebleClef.png"));
             commonTime = ImageIO.read(getClass().getResource("/images/commonTime.png"));
 
@@ -196,54 +194,9 @@ public class MainFrame extends JFrame{
             imageMap.put("HalfRestImage", HalfRestImage);
             imageMap.put("WholeRestImage", WholeRestImage);
 
-            addMouseListener((MouseListener) new MouseInputAdapter() {
-            
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    // pointAdded.add(new Point(e.getX(), e.getY()));
-                    // notesAdded.add((BufferedImage) imageMap.get(labels.get(duration.getValue()).getText() + symbol + "Image"));
-                    symbolMap.put(new Point(e.getX(), e.getY()), imageMap.get(labels.get(duration.getValue()).getText() + symbol + "Image"));
-                    // lastNote += 1;
-                    setStatusText("mouseclicked");
-                    repaint();
-                }
-        
-        
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    
-                }
-        
-        
-                @Override
-                public void mouseReleased(MouseEvent e) {
-                    
-                }
-        
-        
-                @Override
-                public void mouseEntered(MouseEvent e) {
+            this.addMouseListener(this);
+            this.addMouseMotionListener(this);
 
-                }
-        
-        
-                @Override
-                public void mouseExited(MouseEvent e) {
-                    
-                }
-        
-        
-                @Override
-                public void mouseDragged(MouseEvent e) {
-
-                }
-        
-        
-                @Override
-                public void mouseMoved(MouseEvent e) {
-
-                }
-            });
         }
                
         
@@ -257,7 +210,7 @@ public class MainFrame extends JFrame{
             g.drawImage(commonTime, 120, y+8, 25, 45, null);
             g.drawLine(50, 0+y, 50, 60+y);
 
-            if ( last == true){
+            if (last == true){
                 ((Graphics2D) g).setStroke(new BasicStroke(8f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL));
                 g.drawLine(1050, 0+y, 1050, 60+y);
             } else {
@@ -283,63 +236,59 @@ public class MainFrame extends JFrame{
             Enumeration<Point> e = symbolMap.keys();
             while (e.hasMoreElements()) {
                 Point key = e.nextElement();
-                g.drawImage(symbolMap.get(key), key.x, key.y, 60, 115, null);
+                g.drawImage(symbolMap.get(key), key.x, key.y,null);
             }
-            
-            // for (Point p : pointAdded){
-            //     // g.setColor(java.awt.Color.RED);
-            //     BufferedImage imageSelection = imageMap.get(labels.get(duration.getValue()).getText() + symbol + "Image");                 
-            //     g.drawImage(imageSelection, p.x, p.y, 60, 115, null);
-            // }
+
+
+            if (!(dragPoint.x==0 && dragPoint.y==0)){
+                g.drawImage(imageMap.get(labels.get(duration.getValue()).getText() + symbol + "Image"), dragPoint.x, dragPoint.y, null);            
+            }
         }
 
 
         @Override
         public void mouseClicked(MouseEvent e) {
-            // TODO Auto-generated method stub
-            
         }
 
 
         @Override
         public void mousePressed(MouseEvent e) {
-            // TODO Auto-generated method stub
-            
+            dragPoint = new Point(e.getX(), e.getY());
+            setStatusText("dragging");
+            repaint();
         }
 
 
         @Override
         public void mouseReleased(MouseEvent e) {
-            // TODO Auto-generated method stub
-            
+            symbolMap.put(new Point(e.getX(), e.getY()), imageMap.get(labels.get(duration.getValue()).getText() + symbol + "Image"));
+            setStatusText("mouseclicked");
+            repaint();
         }
 
 
         @Override
         public void mouseEntered(MouseEvent e) {
-            // TODO Auto-generated method stub
-            
+
         }
 
 
         @Override
         public void mouseExited(MouseEvent e) {
-            // TODO Auto-generated method stub
             
         }
 
 
         @Override
         public void mouseDragged(MouseEvent e) {
-            // TODO Auto-generated method stub
-            
+            dragPoint = new Point(e.getX(), e.getY());
+            setStatusText("dragging");
+            repaint();
         }
 
 
         @Override
         public void mouseMoved(MouseEvent e) {
-            // TODO Auto-generated method stub
-            
         }
 
         // Hashtable<Integer, JLabel> labels = new Hashtable<Integer, JLabel>();
