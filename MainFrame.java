@@ -57,7 +57,7 @@ public class MainFrame extends JFrame{
 
 
     static String[] columns = new String[] {
-        "Id", "Name", "x", "y", "Duration"
+        "Id", "Name", "x", "y", "Duration", "Deleted"
     };
         
     static Object[][] data = new Object[][] {
@@ -311,7 +311,7 @@ public class MainFrame extends JFrame{
             this.addMouseListener(this);
             this.addMouseMotionListener(this);
             this.addKeyListener(this);
-
+            setFocusable(true);
         }
                
         
@@ -351,17 +351,19 @@ public class MainFrame extends JFrame{
                 draw(g, 104 + i*ht, last);
             }            
 
-
             for (int i=0; i<numRows; i++){
-                int drawX = (int) symbolTable.getModel().getValueAt(i, 2);
-                int drawY = (int) symbolTable.getModel().getValueAt(i, 3);
-                // g.translate(-10, -10);
-                g.drawImage(imageMap.get(symbolTable.getModel().getValueAt(i, 1)), drawX, drawY,null);
-                if (i == idSymbolSelected){
-                    lengthSymbol((String) symbolTable.getModel().getValueAt(i, 4));
-                    ((Graphics2D) g).setStroke(new BasicStroke(2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL));
-                    g.setColor(java.awt.Color.red);
-                    g.drawRect(drawX , drawY , lengthX, lengthY);
+                Boolean deleted = (Boolean) symbolTable.getModel().getValueAt(i, 5);
+                if (!deleted){
+                    int drawX = (int) symbolTable.getModel().getValueAt(i, 2);
+                    int drawY = (int) symbolTable.getModel().getValueAt(i, 3);
+                    // g.translate(-10, -10);
+                    g.drawImage(imageMap.get(symbolTable.getModel().getValueAt(i, 1)), drawX, drawY,null);
+                    if (i == idSymbolSelected && selectMode == true){
+                        lengthSymbol((String) symbolTable.getModel().getValueAt(i, 4));
+                        ((Graphics2D) g).setStroke(new BasicStroke(2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL));
+                        g.setColor(java.awt.Color.red);
+                        g.drawRect(drawX , drawY , lengthX, lengthY);
+                    }
                 }
             }
 
@@ -385,12 +387,14 @@ public class MainFrame extends JFrame{
         @Override
         public void mousePressed(MouseEvent e) {
             
+            
+
             if (selectMode == false){
                 offsetSymbol(labels.get(duration.getValue()).getText());
                 dragPoint = new Point(e.getX() + offsetX, e.getY() + offsetY);
                 repaint();
             } else {
-                
+                requestFocusInWindow();
                 setStatusText("Pressed; looking for selected symbol.");
                 idSymbolSelected = -1;
                 for (int i=numRows-1; i>=0; i--){
@@ -423,7 +427,7 @@ public class MainFrame extends JFrame{
                 int y = e.getY() + offsetY;
                 numRows += 1;
                 String durationNote = labels.get(duration.getValue()).getText();
-                model.addRow(new Object[]{numRows, durationNote + symbol + "Image", x , y, durationNote});
+                model.addRow(new Object[]{numRows, durationNote + symbol + "Image", x , y, durationNote, false});
                 int actualY = 0;
                 if (symbol == "Note"){
         
@@ -494,24 +498,28 @@ public class MainFrame extends JFrame{
 
         @Override
         public void keyTyped(KeyEvent e) {
-            
+
         }
 
 
         @Override
         public void keyPressed(KeyEvent e) {
-            
+            if (idSymbolSelected != -1){
+                if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE || e.getKeyCode() == KeyEvent.VK_DELETE){
+                    
+                    // model.removeRow(idSymbolSelected);
+                    model.setValueAt(true, idSymbolSelected, 5);
+                    setStatusText("Delete" + model.getRowCount());
+                    repaint();
+                }
+            }
+            // setStatusText("Key pressed code=" + e.getKeyCode());            
         }
 
 
         @Override
         public void keyReleased(KeyEvent e) {
-            if (idSymbolSelected != -1){
-                if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE || e.getKeyCode() == KeyEvent.VK_DELETE){
-                    model.removeRow(idSymbolSelected);
-                    repaint();
-                }
-            }
+
         }
     }
 
@@ -685,6 +693,7 @@ public class MainFrame extends JFrame{
         btnPen.addActionListener(e -> {
                 setStatusText("Pen Button");
                 selectMode = false;
+                idSymbolSelected = -1;
         });
 
 
