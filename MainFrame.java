@@ -5,7 +5,6 @@ import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Hashtable;
-import java.awt.Point;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -20,8 +19,6 @@ public class MainFrame extends JFrame{
     final static Font mainFont = new Font("Arial", Font.ROMAN_BASELINE, 18);
     final static Font subFont = new Font("Arial", Font.ITALIC, 14);
     final static Font buttonFont = new Font("Arial", Font.BOLD, 12);
-    // static Color btnColor = new Color(168, 218, 220);
-
     
     static JFrame f;
     static JMenuBar menuBar;
@@ -41,8 +38,6 @@ public class MainFrame extends JFrame{
     static JPanel content;
     static MusicView music;
     static boolean selectMode = false;
-    // static ArrayList<Point> pointAdded = new ArrayList<>();
-    // static ArrayList<BufferedImage> notesAdded = new ArrayList<>();
     static JSlider duration;
     static String symbol = "Note";
     static String imageSelection = "HalfNoteImage";
@@ -54,10 +49,10 @@ public class MainFrame extends JFrame{
     static Integer lengthY = 30;
     static Integer mouseOffsetX = 0;
     static Integer mouseOffsetY = 0;
-
+    static JScrollPane contentPane;
 
     static String[] columns = new String[] {
-        "Id", "Name", "x", "y", "Duration", "Deleted"
+        "Id", "Name", "x", "y", "Duration", "Deleted", "PageNo"
     };
         
     static Object[][] data = new Object[][] {
@@ -66,7 +61,7 @@ public class MainFrame extends JFrame{
     static DefaultTableModel model = new DefaultTableModel(data, columns);
     static JTable symbolTable = new JTable(model);    
 
-    ////Setting button style
+    //Setting button style
     public static void setButtonProperties(JButton buttonName, String buttonDef) {
         buttonName.setText(buttonDef);
         buttonName.setFont(buttonFont);
@@ -74,18 +69,61 @@ public class MainFrame extends JFrame{
         buttonName.setHorizontalAlignment(SwingConstants.LEFT);  
     }
 
-    ////Setting status bar text
+    //Setting status bar text
     public static void setStatusText(String statusText) {
         statusBar.setText(statusText + " was selected last. ");
     }
 
     public static void setPitchStatusText(String statusText) {
-        statusBar.setText(statusText + " is the pitch of the note added. ");
+        statusBar.setText(statusText + " is the pitch of the note added.");
     }
 
-    ////Setting central text
+    //Setting central text
     public static void setCentraltext(){
         stavesInfo.setText("My Music Editor. Showing " + pageStaves.get(curPage) + " staves (Page " + curPage + " of " + numPages + ")");
+    }
+
+    public static int setActualY(String durationNote, int y){
+
+        if (durationNote == "Whole"){
+            return((y + 5)%104);
+        } else if (durationNote == "Half"){
+            return((y + 34)%104);
+        } else if (durationNote == "Quarter"){
+            return((y + 34)%104);
+        } else if (durationNote == "Eighth"){
+            return((y + 34)%104);
+        } else if (durationNote == "Sixteenth"){
+            return((y + 34)%104);
+        } else return 0; 
+    }
+
+
+    public static void checkPitch(double actualY){
+
+        if (actualY >= 100.75){
+            setPitchStatusText("F5");
+        } else if (actualY <= 3.25){
+            setPitchStatusText("F5");
+        } else if (actualY >3.25 && actualY <= 9.75){
+            setPitchStatusText("E5");
+        } else if (actualY >9.75 && actualY <= 16.25){
+            setPitchStatusText("D5");
+        } else if (actualY >16.25 && actualY <= 22.75){
+            setPitchStatusText("C5");
+        } else if (actualY >22.75 && actualY <= 29.25){
+            setPitchStatusText("B5");
+        } else if (actualY >29.25 && actualY <= 35.75){
+            setPitchStatusText("A5");
+        } else if (actualY >35.75 && actualY <= 42.25){
+            setPitchStatusText("G4");
+        } else if (actualY >42.25 && actualY <= 48.75){
+            setPitchStatusText("F4");
+        } else if (actualY >48.75 && actualY <= 55.25){
+            setPitchStatusText("E4");
+        } else{
+            statusBar.setText("The note is outside the staff area! The pitch cannot be identified.");
+        }
     }
 
     public static void offsetSymbol(String durationNote){
@@ -108,22 +146,8 @@ public class MainFrame extends JFrame{
             }
         } 
         if (symbol == "Rest"){
-            if (durationNote == "Whole"){
-                offsetX = -5;
-                offsetY = -5;
-            } else if (durationNote == "Half"){
-                offsetX = -5;
-                offsetY = -5;
-            } else if (durationNote == "Quarter"){
-                offsetX = -5;
-                offsetY = -5;
-            } else if (durationNote == "Eighth"){
-                offsetX = -5;
-                offsetY = -5;
-            } else if (durationNote == "Sixteenth"){
-                offsetX = -5;
-                offsetY = -5;
-            }
+            offsetX = -5;
+            offsetY = -5;
         } 
     }
 
@@ -166,7 +190,7 @@ public class MainFrame extends JFrame{
         } 
     }
 
-    ////Enables or disables delete staff buttons
+    //Enables or disables delete staff buttons
     public static void checkDeleteStaff() {
         if (pageStaves.get(curPage) == 1){
             btnDelete.setEnabled(false);
@@ -177,7 +201,7 @@ public class MainFrame extends JFrame{
         }
     }
 
-    ////Enables or disables delete page buttons
+    //Enables or disables delete page buttons
     public static void updateAddDelete() {
         if (numPages == 1){            
             deletePageMenuItem.setEnabled(false);
@@ -188,7 +212,7 @@ public class MainFrame extends JFrame{
         }
     }
 
-    ////Enables or disables next-previous page buttons
+    //Enables or disables next-previous page buttons
     public static void updateNextPrev() {
         if (curPage == 1){            
             prevPageMenuItem.setEnabled(false);
@@ -210,7 +234,7 @@ public class MainFrame extends JFrame{
     }
 
 
-    ////Methods for adding or deleting page
+    //Methods for adding or deleting page
     public static void addPage() {
         numPages = numPages + 1;
         updateAddDelete();
@@ -221,6 +245,19 @@ public class MainFrame extends JFrame{
     }
 
     public static void deletePage() {
+        
+
+        for (int i=0; i<numRows; i++){
+            Integer pageNo = (Integer) symbolTable.getModel().getValueAt(i, 6);
+            if (pageNo == curPage){
+                model.setValueAt(-1, i, 6);
+            } else if (pageNo > curPage){
+                setStatusText("page no is " + pageNo + "cur page is " + curPage);
+                model.setValueAt(pageNo - 1, i, 6);
+            }
+        }
+        music.repaint();
+
         numPages = numPages - 1;
 
         pageStaves.forEach((key, value)
@@ -235,19 +272,17 @@ public class MainFrame extends JFrame{
         if(numPages < curPage){
             prevPage();
         }
-        // setStatusText("Delete page");
-        statusBar.setText("val is" + pageStaves);
         setCentraltext();
     }
 
-    ////Methods for next or previous page
+    //Methods for next or previous page
     public static void nextPage() {
         curPage = curPage + 1;   
         checkDeleteStaff();         
         updateNextPrev();
         setCentraltext(); 
         setStatusText("Next page");  
-        setSizeMusicView();
+        music.repaint();
     }
 
     public static void prevPage() {
@@ -255,25 +290,16 @@ public class MainFrame extends JFrame{
         updateNextPrev();
         setCentraltext(); 
         setStatusText("Previous page");
-        setSizeMusicView();
+        music.repaint();
     }
 
-    public static void setSizeMusicView(){
-        int heightMusicView = (int) pageStaves.get(curPage)*104 + 156;
-        music.setSize(1100, heightMusicView);
-        // setPitchStatusText(pageStaves.get(curPage) + "staves" + heightMusicView);
-        music.setPreferredSize(new Dimension(1100, heightMusicView));
-        content.setBorder(BorderFactory.createEmptyBorder(52, 50, 52, 50));
-    }
-
-
+    //The Music View: Displays the notes
     static class MusicView extends JComponent implements MouseInputListener, KeyListener{   
         
         final BufferedImage trebleClef, commonTime, flatImage, sharpImage, naturalImage;
         final BufferedImage SixteenthNoteImage, EighthNoteImage, QuarterNoteImage, HalfNoteImage, WholeNoteImage;
         final BufferedImage SixteenthRestImage, EighthRestImage, QuarterRestImage, HalfRestImage, WholeRestImage;
-
-        
+      
 
         public MusicView() throws IOException{
 
@@ -340,6 +366,7 @@ public class MainFrame extends JFrame{
             Integer ht = 104;
             Boolean last = false;
             
+            
             g.setColor(java.awt.Color.white);
             g.fillRect(0, 0, getWidth(), getHeight());
             g.setColor(java.awt.Color.black);
@@ -352,20 +379,26 @@ public class MainFrame extends JFrame{
             }            
 
             for (int i=0; i<numRows; i++){
-                Boolean deleted = (Boolean) symbolTable.getModel().getValueAt(i, 5);
-                if (!deleted){
-                    int drawX = (int) symbolTable.getModel().getValueAt(i, 2);
-                    int drawY = (int) symbolTable.getModel().getValueAt(i, 3);
-                    // g.translate(-10, -10);
-                    g.drawImage(imageMap.get(symbolTable.getModel().getValueAt(i, 1)), drawX, drawY,null);
-                    if (i == idSymbolSelected && selectMode == true){
-                        lengthSymbol((String) symbolTable.getModel().getValueAt(i, 4));
-                        ((Graphics2D) g).setStroke(new BasicStroke(2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL));
-                        g.setColor(java.awt.Color.red);
-                        g.drawRect(drawX , drawY , lengthX, lengthY);
+                if ((Integer) symbolTable.getModel().getValueAt(i, 6) == curPage){
+
+                    Boolean deleted = (Boolean) symbolTable.getModel().getValueAt(i, 5);
+                    if (!deleted){
+                        int drawX = (int) symbolTable.getModel().getValueAt(i, 2);
+                        int drawY = (int) symbolTable.getModel().getValueAt(i, 3);
+                        g.drawImage(imageMap.get(symbolTable.getModel().getValueAt(i, 1)), drawX, drawY,null);
+                        if (i == idSymbolSelected && selectMode == true){
+                            lengthSymbol((String) symbolTable.getModel().getValueAt(i, 4));
+                            ((Graphics2D) g).setStroke(new BasicStroke(2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL));
+                            g.setColor(java.awt.Color.red);
+                            g.drawRect(drawX , drawY , lengthX, lengthY);
+                        }
                     }
                 }
             }
+
+            int heightMusicView = (int) pageStaves.get(curPage)*104 + 156;
+            music.setSize(1100, heightMusicView);
+            music.setPreferredSize(new Dimension(1100, heightMusicView)); 
 
             if (!(dragPoint.x==0 && dragPoint.y==0)){
                 if (selectMode == false){
@@ -373,9 +406,6 @@ public class MainFrame extends JFrame{
                 }
             }
 
-            // if (!(dragPoint.x==0 && dragPoint.y==0)){
-            //     g.drawImage(imageMap.get(labels.get(duration.getValue()).getText() + symbol + "Image"), dragPoint.x, dragPoint.y, null);            
-            // }
         }
 
 
@@ -385,8 +415,7 @@ public class MainFrame extends JFrame{
 
 
         @Override
-        public void mousePressed(MouseEvent e) {
-            
+        public void mousePressed(MouseEvent e) {         
             
 
             if (selectMode == false){
@@ -395,70 +424,59 @@ public class MainFrame extends JFrame{
                 repaint();
             } else {
                 requestFocusInWindow();
-                setStatusText("Pressed; looking for selected symbol.");
                 idSymbolSelected = -1;
+
                 for (int i=numRows-1; i>=0; i--){
                     lengthSymbol((String) symbolTable.getModel().getValueAt(i, 4));
                     int symbolX = (int) symbolTable.getModel().getValueAt(i, 2);
                     int symbolY = (int) symbolTable.getModel().getValueAt(i, 3);
                     int mouseX = e.getX();
                     int mouseY = e.getY();
-                    // g.drawImage(imageMap.get(symbolTable.getModel().getValueAt(i, 1)), (int) symbolTable.getModel().getValueAt(i, 2), (int) symbolTable.getModel().getValueAt(i, 3),null);
                     if ( mouseX < symbolX + lengthX + 5  && mouseX > symbolX - 5 && mouseY < symbolY + lengthY + 5 && mouseY > symbolY - 5 ){
                         idSymbolSelected = i;
                         mouseOffsetX = mouseX - symbolX;
-                        mouseOffsetY = mouseY - symbolY;
-                        setStatusText("selected " + i + " at "+ e.getX());
-                        repaint();
+                        mouseOffsetY = mouseY - symbolY;                 
                         break;
                     }
-                }       
+                }  
+                repaint();
             }
         }
 
 
         @Override
         public void mouseReleased(MouseEvent e) {
-            // symbolMap.put(new Point(e.getX(), e.getY()), imageMap.get(labels.get(duration.getValue()).getText() + symbol + "Image"));
-
 
             if (selectMode == false){
+
+                dragPoint.x = 0;
+                dragPoint.y = 0;
+                offsetSymbol(labels.get(duration.getValue()).getText());
+                
                 int x = e.getX() + offsetX;
                 int y = e.getY() + offsetY;
                 numRows += 1;
+                
                 String durationNote = labels.get(duration.getValue()).getText();
-                model.addRow(new Object[]{numRows, durationNote + symbol + "Image", x , y, durationNote, false});
-                int actualY = 0;
-                if (symbol == "Note"){
-        
-                    //E4, F4, G4, A5, B5, C5, D5, E5, and F5
-                    if (actualY >= 101 || actualY <= 3){
-                        setPitchStatusText("F5");
-                    } else if (actualY >3 && actualY <= 10){
-                        setPitchStatusText("E5");
-                    } else if (actualY >10 && actualY <= 16){
-                        setPitchStatusText("D5");
-                    } else if (actualY >16 && actualY <= 23){
-                        setPitchStatusText("C5");
-                    } else if (actualY >23 && actualY <= 29){
-                        setPitchStatusText("B5");
-                    } else if (actualY >29 && actualY <= 36){
-                        setPitchStatusText("A5");
-                    } else if (actualY >36 && actualY <= 42){
-                        setPitchStatusText("G4");
-                    } else if (actualY >42 && actualY <= 49){
-                        setPitchStatusText("F4");
-                    } else if (actualY >49 && actualY <= 55){
-                        setPitchStatusText("E4");
-                    } else{
-                        setPitchStatusText("The note is outside the staff area! The pitch cannot be identified.");
-                    }
-                }         
-            }  else if (idSymbolSelected != -1){
-                setStatusText("selected");
-            }            
-            // setStatusText("mouseclicked");
-            repaint();
+                // double adjustedY = 0.0;
+
+                double actualY = setActualY(durationNote, y);
+                if (symbol == "Note"){        
+                    checkPitch(actualY);
+                }          
+                model.addRow(new Object[]{numRows, durationNote + symbol + "Image", x , y, durationNote, false, curPage});       
+                repaint();
+
+            } else if (idSymbolSelected != -1){
+                
+                String durationNote = (String) symbolTable.getModel().getValueAt(idSymbolSelected, 4);
+                offsetSymbol(durationNote);
+
+                int actualY = setActualY(durationNote, e.getY() + offsetY);
+                if (symbol == "Note"){        
+                    checkPitch(actualY);
+                }        
+            }
         }
 
 
@@ -477,12 +495,10 @@ public class MainFrame extends JFrame{
         @Override
         public void mouseDragged(MouseEvent e) {
             if (selectMode == false){
-                // offsetSymbol(labels.get(duration.getValue()).getText());
                 dragPoint = new Point(e.getX() + offsetX, e.getY() + offsetY);
                 
                 
             } else if (idSymbolSelected != -1) {
-                // offsetSymbol((String) symbolTable.getModel().getValueAt(idSymbolSelected, 4));
                 model.setValueAt(e.getX() - mouseOffsetX, idSymbolSelected, 2);
                 model.setValueAt(e.getY() - mouseOffsetY, idSymbolSelected, 3);
             }    
@@ -492,7 +508,7 @@ public class MainFrame extends JFrame{
 
         @Override
         public void mouseMoved(MouseEvent e) {
-            
+                   
         }
 
 
@@ -506,14 +522,11 @@ public class MainFrame extends JFrame{
         public void keyPressed(KeyEvent e) {
             if (idSymbolSelected != -1){
                 if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE || e.getKeyCode() == KeyEvent.VK_DELETE){
-                    
-                    // model.removeRow(idSymbolSelected);
+
                     model.setValueAt(true, idSymbolSelected, 5);
-                    setStatusText("Delete" + model.getRowCount());
                     repaint();
                 }
-            }
-            // setStatusText("Key pressed code=" + e.getKeyCode());            
+            } 
         }
 
 
@@ -531,14 +544,26 @@ public class MainFrame extends JFrame{
             deleteMenuItem.setEnabled(true);
             btnDelete.setEnabled(true);
         }
+
         setStatusText("New Staff");
-        setCentraltext(); 
-        setSizeMusicView();
+        setCentraltext();         
         music.repaint();
-        
+        contentPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        contentPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
     }
 
     public static void deleteStaff() {
+
+        int height = (int) pageStaves.get(curPage)*104;
+        for (int i=0; i<numRows; i++){
+            Integer pageNo = (Integer) symbolTable.getModel().getValueAt(i, 6);
+            if (pageNo == curPage){
+                if((Integer) symbolTable.getModel().getValueAt(i, 3) > height - 52){
+                    model.setValueAt(true, i, 5);
+                }                
+            }            
+        }
+        
         pageStaves.put(curPage, pageStaves.get(curPage) - 1);    
                 
         if(pageStaves.get(curPage)==1){
@@ -547,8 +572,10 @@ public class MainFrame extends JFrame{
         }
         setStatusText("Delete Staff");
         setCentraltext();    
-        setSizeMusicView();
-        music.repaint();     
+        music.repaint(); 
+        contentPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        contentPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        
     }
 
     /*Method to display the layout*/
@@ -562,22 +589,17 @@ public class MainFrame extends JFrame{
 
         /*Main Content Panel */
         content = new JPanel();          
-        // content.setBackground(new Color(241, 250, 238));
-        // content.setLayout((new GridLayout(1, 1)));  
-        content.setLayout((new BoxLayout(content, BoxLayout.Y_AXIS)));     
+        content.setLayout((new BoxLayout(content, BoxLayout.Y_AXIS))); 
+        content.setBorder(BorderFactory.createEmptyBorder(52, 50, 52, 50));    
         
-        JScrollPane contentPane = new JScrollPane(content);   
+        contentPane = new JScrollPane(content);   
         contentPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         contentPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         contentPane.setOpaque(false); 
         
         music = new MusicView();
         content.add(music); 
-        setSizeMusicView();
-        music.setMinimumSize(new Dimension(50,50));        
-                // stavesInfo.setHorizontalAlignment(JLabel.CENTER);
-        // setCentraltext();  
-        
+           
         
         /*Icons for buttons */
         java.net.URL nextURL = MainFrame.class.getResource("images/next.png");
@@ -592,10 +614,6 @@ public class MainFrame extends JFrame{
         ImageIcon newIcon =  new ImageIcon(newURL);
         java.net.URL deleteURL = MainFrame.class.getResource("images/delete.png");
         ImageIcon deleteIcon =  new ImageIcon(deleteURL);
-        java.net.URL playURL = MainFrame.class.getResource("images/play.png");
-        ImageIcon playIcon =  new ImageIcon(playURL);
-        java.net.URL stopURL = MainFrame.class.getResource("images/stop.png");
-        ImageIcon stopIcon =  new ImageIcon(stopURL);
 
 
         /*Buttons */
@@ -615,10 +633,6 @@ public class MainFrame extends JFrame{
         setButtonProperties(btnNew, "New Staff");
         btnDelete = new JButton(deleteIcon);
         setButtonProperties(btnDelete, "Delete staff");
-        JButton btnPlay = new JButton(playIcon);
-        setButtonProperties(btnPlay, "Play");
-        JButton btnStop = new JButton(stopIcon);
-        setButtonProperties(btnStop, "Stop");
 
         btnPrevPage.setEnabled(false);
         btnDeletePage.setEnabled(false);
@@ -639,8 +653,6 @@ public class MainFrame extends JFrame{
         buttonPanel.add(btnPen);
         buttonPanel.add(btnNew);
         buttonPanel.add(btnDelete);
-        buttonPanel.add(btnPlay);
-        buttonPanel.add(btnStop);
         buttonPanel.setOpaque(false);
 
         /*Selection of add page*/
@@ -695,18 +707,6 @@ public class MainFrame extends JFrame{
                 selectMode = false;
                 idSymbolSelected = -1;
         });
-
-
-        /*Selection of play button*/
-        btnPlay.addActionListener(e -> {
-                setStatusText("Play Button");
-        });
-        
-        /*Selection of stop button*/
-        btnStop.addActionListener(e -> {
-                setStatusText("Stop Button");
-        });
-
 
         /*Radio Panel */
         JRadioButton option1 = new JRadioButton("Note");

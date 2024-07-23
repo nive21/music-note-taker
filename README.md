@@ -1,18 +1,24 @@
-## Getting Started
+**Description:**
 
-Welcome to the VS Code Java world. Here is a guideline to help you get started to write Java code in Visual Studio Code.
+An app built wih Java Swing that helps create music notes. It allows interactions such as drag and auto adjusts the position of the note if not precise. This project was a submission for the course CS-6456.
 
-## Folder Structure
+**To run:**
 
-The workspace contains two folders by default, where:
+The app can be directly run using the executable JAR file. The JAR file can be also be created using the compiled files in the bin folder.
 
-- `src`: the folder to maintain sources
-- `lib`: the folder to maintain dependencies
+**References:**
 
-Meanwhile, the compiled output files will be generated in the `bin` folder by default.
+Paint Component:
+https://www.tutorialspoint.com/how-can-we-implement-the-paintcomponent-method-of-a-jpanel-in-java
 
-> If you want to customize the folder structure, open `.vscode/settings.json` and update the related settings there.
+Drawing line:
+https://www.codejava.net/java-se/graphics/drawing-lines-examples-with-graphics2d
 
-## Dependency Management
+Drawing on mouseclick:
+https://stackoverflow.com/questions/72085836/draw-point-on-mouse-click-with-java-swing
 
-The `JAVA PROJECTS` view allows you to manage your dependencies. More details can be found [here](https://github.com/microsoft/vscode-java-dependency#manage-dependencies).
+Iterate throughh hashtable:
+https://www.geeksforgeeks.org/how-to-iterate-through-hashtable-in-java/
+
+TableModel:
+https://www.tutorialspoint.com/how-to-retrieve-the-value-from-a-table-cell-with-tablemodel-in-java
